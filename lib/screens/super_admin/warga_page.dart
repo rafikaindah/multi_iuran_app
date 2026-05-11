@@ -34,17 +34,17 @@ class _WargaPageState extends State<WargaPage> {
               children: [
                 TextField(
                   controller: namaController,
-                  decoration: const InputDecoration(labelText: "Nama"),
+                  decoration: const InputDecoration(labelText: "Nama *"),
                 ),
 
                 TextField(
                   controller: alamatController,
-                  decoration: const InputDecoration(labelText: "Alamat"),
+                  decoration: const InputDecoration(labelText: "Alamat *"),
                 ),
 
                 TextField(
                   controller: noHpController,
-                  decoration: const InputDecoration(labelText: "No HP"),
+                  decoration: const InputDecoration(labelText: "No HP *"),
                 ),
               ],
             ),
@@ -61,6 +61,29 @@ class _WargaPageState extends State<WargaPage> {
 
             ElevatedButton(
               onPressed: () async {
+                // validasi nama
+                if (namaController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Nama wajib diisi")),
+                  );
+                  return;
+                }
+
+                // validasi alamat
+                if (alamatController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Alamat wajib diisi")),
+                  );
+                  return;
+                }
+
+                // validasi no hp
+                if (noHpController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("No HP wajib diisi")),
+                  );
+                  return;
+                }
                 await wargaController.tambahWarga(
                   nama: namaController.text,
                   alamat: alamatController.text,
@@ -98,12 +121,12 @@ class _WargaPageState extends State<WargaPage> {
               children: [
                 TextField(
                   controller: namaController,
-                  decoration: const InputDecoration(labelText: "Nama"),
+                  decoration: const InputDecoration(labelText: "Nama *"),
                 ),
 
                 TextField(
                   controller: alamatController,
-                  decoration: const InputDecoration(labelText: "Alamat"),
+                  decoration: const InputDecoration(labelText: "Alamat *"),
                 ),
 
                 TextField(
@@ -125,6 +148,29 @@ class _WargaPageState extends State<WargaPage> {
 
             ElevatedButton(
               onPressed: () async {
+                // validasi nama
+                if (namaController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Nama wajib diisi")),
+                  );
+                  return;
+                }
+
+                // validasi alamat
+                if (alamatController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Alamat wajib diisi")),
+                  );
+                  return;
+                }
+
+                // validasi no hp
+                if (noHpController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("No HP wajib diisi")),
+                  );
+                  return;
+                }
                 await wargaController.editWarga(
                   id: warga.id,
                   nama: namaController.text,
