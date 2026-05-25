@@ -44,6 +44,19 @@ class PesertaController {
     return List<Map<String, dynamic>>.from(data);
   }
 
+  //mengambil riwayat pembayaran peserta
+  Future<List<Map<String, dynamic>>> getRiwayatPembayaran(
+    String pesertaId,
+  ) async {
+    final data = await supabase
+        .from('pembayaran')
+        .select()
+        .eq('peserta_id', pesertaId)
+        .order('created_at', ascending: false);
+
+    return List<Map<String, dynamic>>.from(data);
+  }
+
   //tambah peserta
   Future<void> tambahPeserta({
     required String wargaId,

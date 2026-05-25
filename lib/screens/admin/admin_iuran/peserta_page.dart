@@ -85,31 +85,72 @@ class _PesertaPageState extends State<PesertaPage> {
   }
 
   // detail peserta
-  void detailPesertaDialog(PesertaModel peserta) {
+  Future<void> detailPesertaDialog(PesertaModel peserta) async {
+    final riwayatPembayaran = await pesertaController.getRiwayatPembayaran(
+      peserta.id,
+    );
+
     showDialog(
       context: context,
       builder: (_) {
         return AlertDialog(
           title: const Text("Detail Peserta"),
 
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("Nama : ${peserta.namaWarga}"),
-              const SizedBox(height: 8),
+          content: SizedBox(
+            width: double.maxFinite,
 
-              Text("Alamat : ${peserta.alamat}"),
-              const SizedBox(height: 8),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Nama : ${peserta.namaWarga}"),
+                  const SizedBox(height: 8),
 
-              Text("No HP : ${peserta.noHp}"),
-              const SizedBox(height: 8),
+                  Text("Alamat : ${peserta.alamat}"),
+                  const SizedBox(height: 8),
 
-              Text("Iuran : ${peserta.namaIuran}"),
-              const SizedBox(height: 8),
+                  Text("No HP : ${peserta.noHp}"),
+                  const SizedBox(height: 8),
 
-              Text("Status : ${peserta.status}"),
-            ],
+                  Text("Iuran : ${peserta.namaIuran}"),
+                  const SizedBox(height: 8),
+
+                  Text("Status : ${peserta.status}"),
+
+                  const Text(
+                    "Riwayat Pembayaran",
+
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+
+                  if (riwayatPembayaran.isEmpty)
+                    const Text("Belum ada pembayaran"),
+
+                  ...riwayatPembayaran.map((item) {
+                    final periode = List<String>.from(
+                      item['periode_bayar'] ?? [],
+                    );
+
+                    return Card(
+                      child: ListTile(
+                        title: Text("Rp ${item['nominal']}"),
+
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+
+                          children: [
+                            Text("Periode : ${periode.join(", ")}"),
+
+                            Text("Tanggal : ${item['tanggal']}"),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            ),
           ),
 
           actions: [
