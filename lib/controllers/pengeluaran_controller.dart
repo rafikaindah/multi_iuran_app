@@ -10,12 +10,14 @@ class PengeluaranController {
     required int nominal,
     required String tanggal,
     required String keterangan,
+    String? buktiFoto,
   }) async {
     await supabase.from('pengeluaran').insert({
       'iuran_id': iuranId,
       'nominal': nominal,
       'tanggal': tanggal,
       'keterangan': keterangan,
+      'bukti_foto': buktiFoto,
     });
   }
 
