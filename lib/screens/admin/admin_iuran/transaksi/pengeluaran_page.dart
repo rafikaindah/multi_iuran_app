@@ -1,10 +1,155 @@
 import 'package:flutter/material.dart';
+import '../../../../controllers/pengeluaran_controller.dart';
+import '../../../../models/pengeluaran_model.dart';
 
-class PengeluaranPage extends StatelessWidget {
-  const PengeluaranPage({super.key});
+//halaman pengeluaran admin iuran
+class PengeluaranPage extends StatefulWidget {
+  final Map<String, dynamic> iuran;
+
+  const PengeluaranPage({super.key, required this.iuran});
+
+  @override
+  State<PengeluaranPage> createState() => _PengeluaranPageState();
+}
+
+// state untuk halaman pengeluaran
+class _PengeluaranPageState extends State<PengeluaranPage> {
+  final pengeluaranController = PengeluaranController();
+
+  //dialog tambah pengeluaran
+  Future<void> tambahPengeluaranDialog() async {
+    final nominalController = TextEditingController();
+
+    final tanggalController = TextEditingController(
+      text: DateTime.now().toString().split(' ')[0],
+    );
+
+    final keteranganController = TextEditingController();
+
+    showDialog(
+      context: context,
+
+      builder: (_) {
+        return AlertDialog(
+          title: const Text("Tambah Pengeluaran"),
+          // isi dialog untuk input nominal, tanggal, dan keterangan
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+
+              children: [
+                TextField(
+                  controller: nominalController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: "Nominal"),
+                ),
+
+                TextField(
+                  controller: tanggalController,
+                  decoration: const InputDecoration(labelText: "Tanggal"),
+                ),
+
+                TextField(
+                  controller: keteranganController,
+                  decoration: const InputDecoration(labelText: "Keterangan"),
+                ),
+              ],
+            ),
+          ),
+          // aksi untuk tombol simpan dan batal
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+
+              child: const Text("Batal"),
+            ),
+
+            ElevatedButton(
+              onPressed: () async {
+                if (nominalController.text.isEmpty ||
+                    keteranganController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Semua field wajib diisi")),
+                  );
+
+                  return;
+                }
+
+                await pengeluaranController.tambahPengeluaran(
+                  iuranId: widget.iuran['id'],
+                  nominal: int.parse(
+                    nominalController.text.replaceAll('.', ''),
+                  ),
+                  tanggal: tanggalController.text,
+                  keterangan: keteranganController.text,
+                );
+
+                Navigator.pop(context);
+
+                setState(() {});
+              },
+
+              child: const Text("Simpan"),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return const Center(child: Text("Menu Pengeluaran"));
+    return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: tambahPengeluaranDialog,
+
+        child: const Icon(Icons.add),
+      ),
+      // body untuk menampilkan daftar pengeluaran
+      body: FutureBuilder<List<PengeluaranModel>>(
+        future: pengeluaranController.getPengeluaran(widget.iuran['id']),
+
+        builder: (context, snapshot) {
+          //loading
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          //jika kosong
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text("Data pengeluaran kosong"));
+          }
+          //jika ada data pengeluaran
+          final pengeluaranList = snapshot.data!;
+
+          return ListView.builder(
+            itemCount: pengeluaranList.length,
+
+            itemBuilder: (context, index) {
+              final pengeluaran = pengeluaranList[index];
+              // menampilkan card pengeluaran
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+
+                child: ListTile(
+                  title: Text("Rp ${pengeluaran.nominal}"),
+
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+
+                    children: [
+                      Text(pengeluaran.keterangan),
+
+                      Text("Tanggal : ${pengeluaran.tanggal}"),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
   }
 }
