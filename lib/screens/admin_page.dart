@@ -44,6 +44,8 @@ class _AdminPageState extends State<AdminPage> {
               iuran (
                 id,
                 nama_iuran,
+                nominal,
+                periode,
                 status
               )
             ''')

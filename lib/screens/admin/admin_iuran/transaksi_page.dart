@@ -53,7 +53,11 @@ class _TransaksiPageState extends State<TransaksiPage>
       body: TabBarView(
         controller: tabController,
 
-        children: const [PembayaranPage(), PemasukanPage(), PengeluaranPage()],
+        children: [
+          PembayaranPage(iuran: widget.iuran),
+          const PemasukanPage(),
+          const PengeluaranPage(),
+        ],
       ),
     );
   }
