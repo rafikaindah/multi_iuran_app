@@ -55,7 +55,7 @@ class _TransaksiPageState extends State<TransaksiPage>
 
         children: [
           PembayaranPage(iuran: widget.iuran),
-          const PemasukanPage(),
+          PemasukanPage(iuran: widget.iuran),
           const PengeluaranPage(),
         ],
       ),
