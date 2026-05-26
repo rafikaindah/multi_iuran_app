@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../controllers/laporan_controller.dart';
+import '../../../../controllers/pdf_controller.dart';
 
 //halaman laporan admin iuran
 class LaporanPage extends StatefulWidget {
@@ -14,6 +15,7 @@ class LaporanPage extends StatefulWidget {
 // state untuk halaman laporan admin iuran
 class _LaporanPageState extends State<LaporanPage> {
   final laporanController = LaporanController();
+  final pdfController = PdfController();
 
   int selectedBulan = DateTime.now().month;
   int selectedTahun = DateTime.now().year;
@@ -33,6 +35,56 @@ class _LaporanPageState extends State<LaporanPage> {
     'Nov',
     'Des',
   ];
+
+  //fungsi export pdf
+  Future<void> exportPdf() async {
+    final totalPembayaran = await laporanController.totalPembayaran(
+      iuranId: widget.iuran['id'],
+      bulan: selectedBulan,
+      tahun: selectedTahun,
+    );
+
+    final totalPemasukan = await laporanController.totalPemasukan(
+      iuranId: widget.iuran['id'],
+      bulan: selectedBulan,
+      tahun: selectedTahun,
+    );
+
+    final totalPengeluaran = await laporanController.totalPengeluaran(
+      iuranId: widget.iuran['id'],
+      bulan: selectedBulan,
+      tahun: selectedTahun,
+    );
+
+    final saldoSebelumnya = await laporanController.saldoSebelumnya(
+      iuranId: widget.iuran['id'],
+      bulan: selectedBulan,
+      tahun: selectedTahun,
+    );
+
+    final riwayat = await laporanController.getRiwayatTransaksi(
+      iuranId: widget.iuran['id'],
+      bulan: selectedBulan,
+      tahun: selectedTahun,
+    );
+
+    final saldoAkhir =
+        saldoSebelumnya + totalPembayaran + totalPemasukan - totalPengeluaran;
+
+    final pdfBytes = await pdfController.generateLaporanPdf(
+      namaIuran: widget.iuran['nama_iuran'],
+      bulan: selectedBulan,
+      tahun: selectedTahun,
+      saldoSebelumnya: saldoSebelumnya,
+      totalPembayaran: totalPembayaran,
+      totalPemasukan: totalPemasukan,
+      totalPengeluaran: totalPengeluaran,
+      saldoAkhir: saldoAkhir,
+      riwayat: riwayat,
+    );
+
+    await pdfController.previewPdf(pdfBytes);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,6 +154,18 @@ class _LaporanPageState extends State<LaporanPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
 
               children: [
+                // tombol export pdf
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: exportPdf,
+                    icon: const Icon(Icons.picture_as_pdf),
+                    label: const Text("Export PDF"),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
                 //filter bulan tahun
                 Row(
                   children: [
