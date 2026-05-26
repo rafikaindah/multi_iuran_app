@@ -55,4 +55,14 @@ class IuranController {
   }) async {
     await supabase.from('iuran').update({'status': status}).eq('id', id);
   }
+
+  // mengambil iuran aktif saja
+  Future<List<IuranModel>> getIuranAktif() async {
+    final response = await supabase
+        .from('iuran')
+        .select()
+        .eq('status', 'aktif');
+
+    return response.map((item) => IuranModel.fromMap(item)).toList();
+  }
 }
