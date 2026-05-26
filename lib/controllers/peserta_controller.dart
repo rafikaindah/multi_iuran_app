@@ -76,4 +76,43 @@ class PesertaController {
   }) async {
     await supabase.from('peserta').update({'status': status}).eq('id', id);
   }
+
+  //menghitung status pembayaran peserta
+  Future<Map<String, dynamic>> getStatusPembayaran({
+    required String pesertaId,
+    required Map<String, dynamic> iuran,
+  }) async {
+    //ambil pembayaran peserta
+    final data = await supabase
+        .from('pembayaran')
+        .select('periode_bayar')
+        .eq('peserta_id', pesertaId);
+
+    //gabungkan semua periode yang sudah dibayar
+    List<String> periodeBayar = [];
+
+    for (var item in data) {
+      final list = List<String>.from(item['periode_bayar'] ?? []);
+      periodeBayar.addAll(list);
+    }
+    //hitung total periode yang seharusnya sudah dibayar
+    final now = DateTime.now();
+    int totalPeriodeSeharusnya = 0;
+
+    //jika mingguan adalah 4 minggu dalam 1 bulan
+    if (iuran['periode'] == 'Mingguan') {
+      totalPeriodeSeharusnya = 4;
+    }
+    //jika bulanan adalah bulan berjalan
+    else {
+      totalPeriodeSeharusnya = now.month;
+    }
+    final totalSudahBayar = periodeBayar.toSet().length;
+    final tunggakan = totalPeriodeSeharusnya - totalSudahBayar;
+
+    return {
+      'status': tunggakan <= 0 ? 'Lunas' : 'Menunggak',
+      'jumlah_tunggakan': tunggakan <= 0 ? 0 : tunggakan,
+    };
+  }
 }

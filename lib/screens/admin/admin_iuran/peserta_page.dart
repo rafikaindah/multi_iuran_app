@@ -89,6 +89,10 @@ class _PesertaPageState extends State<PesertaPage> {
     final riwayatPembayaran = await pesertaController.getRiwayatPembayaran(
       peserta.id,
     );
+    final statusPembayaran = await pesertaController.getStatusPembayaran(
+      pesertaId: peserta.id,
+      iuran: widget.iuran,
+    );
 
     showDialog(
       context: context,
@@ -117,6 +121,16 @@ class _PesertaPageState extends State<PesertaPage> {
                   const SizedBox(height: 8),
 
                   Text("Status : ${peserta.status}"),
+                  const SizedBox(height: 8),
+
+                  Text("Status Pembayaran : ${statusPembayaran['status']}"),
+                  const SizedBox(height: 8),
+
+                  Text(
+                    "Jumlah Tunggakan : ${statusPembayaran['jumlah_tunggakan']}",
+                  ),
+
+                  const SizedBox(height: 8),
 
                   const Text(
                     "Riwayat Pembayaran",
