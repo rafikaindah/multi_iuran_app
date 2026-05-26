@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw; // pdf widgets dengan alias pw
 import 'package:printing/printing.dart';
+import 'package:http/http.dart' as http;
 
 class PdfController {
   // membuat laporan pdf berdasarkan data yang diberikan
@@ -41,6 +42,25 @@ class PdfController {
 
       return tanggalA.compareTo(tanggalB);
     });
+
+    // simpan gambar bukti foto
+    Map<int, pw.MemoryImage?> buktiImages = {};
+
+    for (int i = 0; i < riwayat.length; i++) {
+      final bukti = riwayat[i]['bukti'];
+
+      if (bukti != null && bukti.toString().isNotEmpty) {
+        try {
+          final response = await http.get(Uri.parse(bukti));
+
+          if (response.statusCode == 200) {
+            buktiImages[i] = pw.MemoryImage(response.bodyBytes);
+          }
+        } catch (e) {
+          buktiImages[i] = null;
+        }
+      }
+    }
 
     // menambahkan halaman dan isi laporan ke dokumen pdf
     pdf.addPage(
@@ -138,6 +158,7 @@ class PdfController {
                 2: const pw.FlexColumnWidth(),
                 3: const pw.FixedColumnWidth(60),
                 4: const pw.FixedColumnWidth(60),
+                5: const pw.FixedColumnWidth(90),
               },
 
               children: [
@@ -149,6 +170,7 @@ class PdfController {
                     tableHeader("Keterangan"),
                     tableHeader("Masuk"),
                     tableHeader("Keluar"),
+                    tableHeader("Bukti"),
                   ],
                 ),
 
@@ -177,6 +199,23 @@ class PdfController {
                       tableCell(item['keterangan']),
                       tableCell(masuk),
                       tableCell(keluar),
+
+                      pw.Padding(
+                        padding: const pw.EdgeInsets.all(5),
+
+                        child:
+                            buktiImages[index] != null
+                                ? pw.Image(
+                                  buktiImages[index]!,
+                                  width: 70,
+                                  height: 70,
+                                  fit: pw.BoxFit.cover,
+                                )
+                                : pw.Text(
+                                  "-",
+                                  style: const pw.TextStyle(fontSize: 9),
+                                ),
+                      ),
                     ],
                   );
                 }),

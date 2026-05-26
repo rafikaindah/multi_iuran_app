@@ -178,6 +178,7 @@ class LaporanController {
         'nominal': total,
         'tanggal': tanggal,
         'keterangan': 'Pembayaran peserta',
+        'bukti': null,
       });
     });
 
@@ -194,6 +195,7 @@ class LaporanController {
         'nominal': item['nominal'],
         'tanggal': item['tanggal'],
         'keterangan': item['keterangan'] ?? '-',
+        'bukti': item['bukti_foto'],
       });
     }
 
@@ -209,6 +211,7 @@ class LaporanController {
         'nominal': item['nominal'],
         'tanggal': item['tanggal'],
         'keterangan': item['keterangan'] ?? '-',
+        'bukti': item['bukti_foto'],
       });
     }
 
