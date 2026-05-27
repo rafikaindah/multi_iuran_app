@@ -115,4 +115,33 @@ class PesertaController {
       'jumlah_tunggakan': tunggakan <= 0 ? 0 : tunggakan,
     };
   }
+
+  //mengambil peserta aktif berdasarkan iuran
+  Future<List<PesertaModel>> getPesertaAktif(String iuranId) async {
+    final data = await supabase
+        .from('peserta')
+        .select('''
+        id,
+        status,
+
+        warga (
+          id,
+          nama,
+          alamat,
+          no_hp
+        ),
+
+        iuran (
+          id,
+          nama_iuran
+        )
+      ''')
+        .eq('iuran_id', iuranId)
+        .eq('status', 'aktif')
+        .order('created_at', ascending: false);
+
+    return data.map<PesertaModel>((item) {
+      return PesertaModel.fromMap(item);
+    }).toList();
+  }
 }
