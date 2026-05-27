@@ -50,4 +50,17 @@ class WargaController {
   }) async {
     await supabase.from('warga').update({'status': status}).eq('id', id);
   }
+
+  // mengambil warga aktif saja
+  Future<List<WargaModel>> getWargaAktif() async {
+    final data = await supabase
+        .from('warga')
+        .select()
+        .eq('status', 'aktif')
+        .order('created_at', ascending: false);
+
+    return data.map<WargaModel>((item) {
+      return WargaModel.fromMap(item);
+    }).toList();
+  }
 }

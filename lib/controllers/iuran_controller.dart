@@ -58,11 +58,14 @@ class IuranController {
 
   // mengambil iuran aktif saja
   Future<List<IuranModel>> getIuranAktif() async {
-    final response = await supabase
+    final data = await supabase
         .from('iuran')
         .select()
-        .eq('status', 'aktif');
+        .eq('status', 'aktif')
+        .order('created_at', ascending: false);
 
-    return response.map((item) => IuranModel.fromMap(item)).toList();
+    return data.map<IuranModel>((item) {
+      return IuranModel.fromMap(item);
+    }).toList();
   }
 }

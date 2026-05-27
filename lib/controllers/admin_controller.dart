@@ -8,22 +8,22 @@ class AdminController {
     final data = await supabase
         .from('admin_iuran_relasi')
         .select('''
+        id,
+        status,
+
+        admin_iuran (
           id,
-          status,
+          nama,
+          email,
+          user_id
+        ),
 
-          admin_iuran (
-            id,
-            nama,
-            email,
-            user_id
-          ),
-
-          iuran (
-            id,
-            nama_iuran,
-            status
-          )
-        ''')
+        iuran (
+          id,
+          nama_iuran,
+          status
+        )
+      ''')
         .order('created_at', ascending: false);
 
     return List<Map<String, dynamic>>.from(data);
@@ -117,5 +117,32 @@ class AdminController {
         .from('admin_iuran_relasi')
         .update({'status': status})
         .eq('id', relasiId);
+  }
+
+  // mengambil admin aktif saja
+  Future<List<Map<String, dynamic>>> getAdminAktif() async {
+    final data = await supabase
+        .from('admin_iuran_relasi')
+        .select('''
+        id,
+        status,
+
+        admin_iuran (
+          id,
+          nama,
+          email,
+          user_id
+        ),
+
+        iuran (
+          id,
+          nama_iuran,
+          status
+        )
+      ''')
+        .eq('status', 'aktif')
+        .order('created_at', ascending: false);
+
+    return List<Map<String, dynamic>>.from(data);
   }
 }
