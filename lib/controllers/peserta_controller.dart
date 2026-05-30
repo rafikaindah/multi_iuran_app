@@ -130,7 +130,7 @@ class PesertaController {
           nama,
           alamat,
           no_hp,
-          status,
+          status
         ),
 
         iuran (
