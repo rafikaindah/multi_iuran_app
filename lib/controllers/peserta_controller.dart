@@ -17,7 +17,8 @@ class PesertaController {
             id,
             nama,
             alamat,
-            no_hp
+            no_hp,
+            status
           ),
 
           iuran (
@@ -128,7 +129,8 @@ class PesertaController {
           id,
           nama,
           alamat,
-          no_hp
+          no_hp,
+          status,
         ),
 
         iuran (

@@ -9,15 +9,20 @@ class PembayaranController {
     final data = await supabase
         .from('peserta')
         .select('''
-          id,
-          warga:warga_id (
-            nama
-          )
-        ''')
+        id,
+        status,
+        warga:warga_id (
+          nama,
+          status
+        )
+      ''')
         .eq('iuran_id', iuranId)
         .eq('status', 'aktif');
 
-    return List<Map<String, dynamic>>.from(data);
+    final pesertaAktif =
+        data.where((item) => item['warga']['status'] == 'aktif').toList();
+
+    return List<Map<String, dynamic>>.from(pesertaAktif);
   }
 
   //tambah pembayaran

@@ -226,10 +226,12 @@ class _PesertaPageState extends State<PesertaPage> {
                     children: [
                       // detail
                       IconButton(
-                        onPressed: () {
-                          detailPesertaDialog(peserta);
-                        },
-
+                        onPressed:
+                            peserta.statusWarga == 'aktif'
+                                ? () {
+                                  detailPesertaDialog(peserta);
+                                }
+                                : null,
                         icon: const Icon(Icons.info),
                       ),
 
@@ -237,14 +239,17 @@ class _PesertaPageState extends State<PesertaPage> {
                       Switch(
                         value: peserta.status == 'aktif',
 
-                        onChanged: (value) async {
-                          await pesertaController.updateStatus(
-                            id: peserta.id,
-                            status: value ? 'aktif' : 'tidak aktif',
-                          );
+                        onChanged:
+                            peserta.statusWarga == 'aktif'
+                                ? (value) async {
+                                  await pesertaController.updateStatus(
+                                    id: peserta.id,
+                                    status: value ? 'aktif' : 'tidak aktif',
+                                  );
 
-                          setState(() {});
-                        },
+                                  setState(() {});
+                                }
+                                : null,
                       ),
                     ],
                   ),

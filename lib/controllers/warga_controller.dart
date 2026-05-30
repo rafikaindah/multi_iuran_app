@@ -48,7 +48,13 @@ class WargaController {
     required String id,
     required String status,
   }) async {
+    // update status warga
     await supabase.from('warga').update({'status': status}).eq('id', id);
+    // update semua peserta milik warga tersebut
+    await supabase
+        .from('peserta')
+        .update({'status': status})
+        .eq('warga_id', id);
   }
 
   // mengambil warga aktif saja
