@@ -24,6 +24,7 @@ class PilihIuranPage extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             child: ListTile(
               title: Text(iuran['nama_iuran']),
+              subtitle: Text("Status: ${iuran['status']}"),
               trailing: const Icon(Icons.arrow_forward_ios),
               //navigasi ke dashboard iuran yang dipilih
               onTap: () {

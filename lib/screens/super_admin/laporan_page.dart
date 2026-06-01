@@ -51,7 +51,7 @@ class _LaporanPageState extends State<LaporanPage> {
 
   // mengambil semua jenis iuran aktif
   Future<void> loadIuran() async {
-    final data = await iuranController.getIuranAktif();
+    final data = await iuranController.getIuran();
 
     setState(() {
       iuranList = data;

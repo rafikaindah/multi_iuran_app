@@ -37,9 +37,34 @@ class _DashboardAdminIuranPageState extends State<DashboardAdminIuranPage> {
 
   @override
   Widget build(BuildContext context) {
+    final iuranAktif = widget.iuran['status'] == 'aktif';
+
     return Scaffold(
-      body:
-          pages[selectedIndex], //menampilkan halaman sesuai index yang dipilih
+      body: Column(
+        children: [
+          // card peringatan jika iuran tidak aktif
+          if (!iuranAktif)
+            Card(
+              color: Colors.orange.shade100,
+              margin: const EdgeInsets.all(12),
+              child: const ListTile(
+                leading: Icon(Icons.warning, color: Colors.orange),
+                title: Text(
+                  "Iuran Tidak Aktif",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text(
+                  "Data masih dapat dilihat, tetapi peserta dan transaksi tidak dapat dikelola.",
+                ),
+              ),
+            ),
+
+          Expanded(
+            child: pages[selectedIndex],
+          ), //menampilkan halaman sesuai index yang dipilih
+        ],
+      ),
+
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: selectedIndex, //menandai index yang aktif
         onTap: (index) {

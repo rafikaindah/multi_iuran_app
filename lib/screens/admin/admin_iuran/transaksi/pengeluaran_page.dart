@@ -168,8 +168,10 @@ class _PengeluaranPageState extends State<PengeluaranPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        onPressed: tambahPengeluaranDialog,
-
+        onPressed:
+            widget.iuran['status'] == 'aktif'
+                ? tambahPengeluaranDialog
+                : null, // tombol tidak aktif jika iuran tidak aktif
         child: const Icon(Icons.add),
       ),
       // body untuk menampilkan daftar pengeluaran

@@ -186,7 +186,8 @@ class _PesertaPageState extends State<PesertaPage> {
       appBar: AppBar(title: Text("Peserta ${widget.iuran['nama_iuran']}")),
 
       floatingActionButton: FloatingActionButton(
-        onPressed: tambahPesertaDialog,
+        onPressed:
+            widget.iuran['status'] == 'aktif' ? tambahPesertaDialog : null,
         child: const Icon(Icons.add),
       ),
 
@@ -240,7 +241,8 @@ class _PesertaPageState extends State<PesertaPage> {
                         value: peserta.status == 'aktif',
 
                         onChanged:
-                            peserta.statusWarga == 'aktif'
+                            peserta.statusWarga == 'aktif' &&
+                                    widget.iuran['status'] == 'aktif'
                                 ? (value) async {
                                   await pesertaController.updateStatus(
                                     id: peserta.id,

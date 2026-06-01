@@ -52,10 +52,9 @@ class _AdminPageState extends State<AdminPage> {
         .eq('admin_id', adminId)
         .eq('status', 'aktif');
 
-    //ambil hanya iuran aktif
+    //ambil semua iuran yang dikelola admin
     final iuranList =
         data
-            .where((item) => item['iuran']['status'] == 'aktif')
             .map<Map<String, dynamic>>(
               (item) => item['iuran'] as Map<String, dynamic>,
             )
