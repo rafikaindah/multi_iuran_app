@@ -151,7 +151,8 @@ class _AdminPageState extends State<AdminPage> {
     final relasiData = await adminController.supabase
         .from('admin_iuran_relasi')
         .select()
-        .eq('admin_id', adminId);
+        .eq('admin_id', adminId)
+        .eq('status', 'aktif');
 
     List<String> selectedIuranIds =
         relasiData.map<String>((e) {
@@ -318,10 +319,12 @@ class _AdminPageState extends State<AdminPage> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        onPressed: () {
-                          editAdminDialog(item);
-                        },
-
+                        onPressed:
+                            status == 'aktif'
+                                ? () {
+                                  editAdminDialog(item);
+                                }
+                                : null,
                         icon: const Icon(Icons.edit),
                       ),
 
