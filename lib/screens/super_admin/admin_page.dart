@@ -12,6 +12,9 @@ class AdminPage extends StatefulWidget {
 class _AdminPageState extends State<AdminPage> {
   final adminController = AdminController();
 
+  //warna utama
+  final primaryColor = const Color.fromARGB(255, 100, 161, 102);
+
   //dialog tambah admin
   Future<void> tambahAdminDialog() async {
     final namaController = TextEditingController();
@@ -20,118 +23,223 @@ class _AdminPageState extends State<AdminPage> {
     final iuranList = await adminController.getIuranAktif();
 
     List<String> selectedIuranIds = [];
+    bool isPasswordHidden = true;
 
     showDialog(
       context: context,
       builder: (_) {
         return StatefulBuilder(
           builder: (context, setModalState) {
-            return AlertDialog(
-              title: const Text("Tambah Admin"),
-
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-
-                  children: [
-                    TextField(
-                      controller: namaController,
-                      decoration: const InputDecoration(labelText: "Nama *"),
-                    ),
-
-                    TextField(
-                      controller: emailController,
-                      decoration: const InputDecoration(labelText: "Email *"),
-                    ),
-
-                    TextField(
-                      controller: passwordController,
-                      obscureText: true,
-                      decoration: const InputDecoration(
-                        labelText: "Password *",
-                      ),
-                    ),
-
-                    const Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text("Pilih Iuran *"),
-                    ),
-
-                    //checkbox iuran aktif
-                    ...iuranList.map((iuran) {
-                      return CheckboxListTile(
-                        value: selectedIuranIds.contains(iuran['id']),
-                        title: Text(iuran['nama_iuran']),
-
-                        onChanged: (value) {
-                          setModalState(() {
-                            if (value == true) {
-                              selectedIuranIds.add(iuran['id']);
-                            } else {
-                              selectedIuranIds.remove(iuran['id']);
-                            }
-                          });
-                        },
-                      );
-                    }),
-                  ],
-                ),
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
               ),
 
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
+              child: Padding(
+                padding: const EdgeInsets.all(20),
 
-                  child: const Text("Batal"),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+
+                    children: [
+                      const Text(
+                        "Tambah Admin",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      //nama
+                      TextField(
+                        controller: namaController,
+                        decoration: InputDecoration(
+                          labelText: "Nama",
+
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 15),
+
+                      //email
+                      TextField(
+                        controller: emailController,
+                        decoration: InputDecoration(
+                          labelText: "Email",
+
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 15),
+
+                      //password
+                      TextField(
+                        controller: passwordController,
+                        obscureText: isPasswordHidden,
+                        decoration: InputDecoration(
+                          labelText: "Password",
+
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+
+                          suffixIcon: IconButton(
+                            onPressed: () {
+                              setModalState(() {
+                                isPasswordHidden = !isPasswordHidden;
+                              });
+                            },
+
+                            icon: Icon(
+                              isPasswordHidden
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Pilih Iuran",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      //checkbox iuran aktif
+                      ...iuranList.map((iuran) {
+                        return CheckboxListTile(
+                          contentPadding: EdgeInsets.zero,
+                          activeColor: primaryColor,
+                          value: selectedIuranIds.contains(iuran['id']),
+                          title: Text(iuran['nama_iuran']),
+
+                          onChanged: (value) {
+                            setModalState(() {
+                              if (value == true) {
+                                selectedIuranIds.add(iuran['id']);
+                              } else {
+                                selectedIuranIds.remove(iuran['id']);
+                              }
+                            });
+                          },
+                        );
+                      }),
+
+                      const SizedBox(height: 20),
+
+                      //tombol
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+
+                              child: const Text("Batal"),
+                            ),
+                          ),
+
+                          const SizedBox(width: 10),
+
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                //validasi
+                                if (namaController.text.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Nama wajib diisi"),
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                if (emailController.text.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Email wajib diisi"),
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                if (passwordController.text.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Password wajib diisi"),
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                if (selectedIuranIds.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Pilih minimal 1 iuran"),
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                //simpan admin
+                                await adminController.tambahAdmin(
+                                  nama: namaController.text,
+                                  email: emailController.text,
+                                  password: passwordController.text,
+                                  iuranIds: selectedIuranIds,
+                                );
+                                Navigator.pop(context);
+                                setState(() {});
+                              },
+
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: primaryColor,
+                                foregroundColor: Colors.white,
+
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+
+                              child: const Text("Simpan"),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-
-                ElevatedButton(
-                  onPressed: () async {
-                    //validasi
-                    if (namaController.text.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Nama wajib diisi")),
-                      );
-                      return;
-                    }
-
-                    if (emailController.text.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Email wajib diisi")),
-                      );
-                      return;
-                    }
-
-                    if (passwordController.text.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Password wajib diisi")),
-                      );
-                      return;
-                    }
-
-                    if (selectedIuranIds.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Pilih minimal 1 iuran")),
-                      );
-                      return;
-                    }
-
-                    //simpan admin
-                    await adminController.tambahAdmin(
-                      nama: namaController.text,
-                      email: emailController.text,
-                      password: passwordController.text,
-                      iuranIds: selectedIuranIds,
-                    );
-                    Navigator.pop(context);
-                    setState(() {});
-                  },
-
-                  child: const Text("Simpan"),
-                ),
-              ],
+              ),
             );
           },
         );
@@ -164,95 +272,167 @@ class _AdminPageState extends State<AdminPage> {
       builder: (_) {
         return StatefulBuilder(
           builder: (context, setModalState) {
-            return AlertDialog(
-              title: const Text("Edit Admin"),
-
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-
-                  children: [
-                    TextField(
-                      controller: namaController,
-                      decoration: const InputDecoration(labelText: "Nama *"),
-                    ),
-
-                    TextField(
-                      controller: emailController,
-                      decoration: const InputDecoration(labelText: "Email *"),
-                    ),
-
-                    const Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text("Pilih Iuran *"),
-                    ),
-
-                    //checkbox iuran aktif
-                    ...iuranList.map((iuran) {
-                      return CheckboxListTile(
-                        value: selectedIuranIds.contains(iuran['id']),
-
-                        title: Text(iuran['nama_iuran']),
-                        onChanged: (value) {
-                          setModalState(() {
-                            if (value == true) {
-                              selectedIuranIds.add(iuran['id']);
-                            } else {
-                              selectedIuranIds.remove(iuran['id']);
-                            }
-                          });
-                        },
-                      );
-                    }),
-                  ],
-                ),
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
               ),
 
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
+              child: Padding(
+                padding: const EdgeInsets.all(20),
 
-                  child: const Text("Batal"),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+
+                    children: [
+                      const Text(
+                        "Edit Admin",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      TextField(
+                        controller: namaController,
+                        decoration: InputDecoration(
+                          labelText: "Nama",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+
+                      TextField(
+                        controller: emailController,
+                        decoration: InputDecoration(
+                          labelText: "Email",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Pilih Iuran",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+
+                      //checkbox iuran aktif
+                      ...iuranList.map((iuran) {
+                        return CheckboxListTile(
+                          contentPadding: EdgeInsets.zero,
+                          activeColor: primaryColor,
+                          value: selectedIuranIds.contains(iuran['id']),
+
+                          title: Text(iuran['nama_iuran']),
+                          onChanged: (value) {
+                            setModalState(() {
+                              if (value == true) {
+                                selectedIuranIds.add(iuran['id']);
+                              } else {
+                                selectedIuranIds.remove(iuran['id']);
+                              }
+                            });
+                          },
+                        );
+                      }),
+                      const SizedBox(height: 20),
+
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+
+                              child: const Text("Batal"),
+                            ),
+                          ),
+
+                          const SizedBox(width: 10),
+
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                if (namaController.text.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Nama wajib diisi"),
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                if (emailController.text.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Email wajib diisi"),
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                if (selectedIuranIds.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Pilih minimal 1 iuran"),
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                await adminController.editAdminLengkap(
+                                  adminId: adminId,
+                                  nama: namaController.text,
+                                  email: emailController.text,
+                                  iuranIds: selectedIuranIds,
+                                );
+                                Navigator.pop(context);
+                                setState(() {});
+                              },
+
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: primaryColor,
+                                foregroundColor: Colors.white,
+
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+
+                              child: const Text("Update"),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-
-                ElevatedButton(
-                  onPressed: () async {
-                    if (namaController.text.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Nama wajib diisi")),
-                      );
-                      return;
-                    }
-
-                    if (emailController.text.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Email wajib diisi")),
-                      );
-                      return;
-                    }
-
-                    if (selectedIuranIds.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Pilih minimal 1 iuran")),
-                      );
-                      return;
-                    }
-
-                    await adminController.editAdminLengkap(
-                      adminId: adminId,
-                      nama: namaController.text,
-                      email: emailController.text,
-                      iuranIds: selectedIuranIds,
-                    );
-                    Navigator.pop(context);
-                    setState(() {});
-                  },
-
-                  child: const Text("Update"),
-                ),
-              ],
+              ),
             );
           },
         );
@@ -263,12 +443,19 @@ class _AdminPageState extends State<AdminPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Data Admin")),
+      backgroundColor: const Color(0xffF5F7FA),
+      appBar: AppBar(
+        title: const Text("Data Admin"),
+        backgroundColor: primaryColor,
+        foregroundColor: Colors.white,
+        elevation: 0,
+      ),
 
       floatingActionButton: FloatingActionButton(
+        backgroundColor: primaryColor,
         onPressed: tambahAdminDialog,
 
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
 
       //tampilkan list admin
@@ -280,14 +467,17 @@ class _AdminPageState extends State<AdminPage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          // jika data kosong
+          //jika data kosong
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("Data admin kosong"));
+            return const Center(
+              child: Text("Data admin kosong", style: TextStyle(fontSize: 16)),
+            );
           }
           //menampilkan data admin jika ada
           final adminList = snapshot.data!;
           //menampilkan data admin dalam bentuk list
           return ListView.builder(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
             itemCount: adminList.length,
 
             itemBuilder: (context, index) {
@@ -298,48 +488,139 @@ class _AdminPageState extends State<AdminPage> {
               final iuran = item['iuran'];
 
               //kartu untuk menampilkan data admin
-              return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              return Container(
+                margin: const EdgeInsets.only(bottom: 14),
 
-                child: ListTile(
-                  title: Text(admin['nama']),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
 
-                  subtitle: Column(
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
 
                     children: [
-                      Text(admin['email']),
-                      Text("Iuran: ${iuran['nama_iuran']}"),
-                      Text("Status: $status"),
-                    ],
-                  ),
+                      //nama admin
+                      Text(
+                        admin['nama'],
 
-                  //aksi edit dan switch status admin
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        onPressed:
-                            status == 'aktif'
-                                ? () {
-                                  editAdminDialog(item);
-                                }
-                                : null,
-                        icon: const Icon(Icons.edit),
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
 
-                      Switch(
-                        value: status == 'aktif',
+                      const SizedBox(height: 10),
 
-                        onChanged: (value) async {
-                          await adminController.updateStatusRelasi(
-                            relasiId: relasiId,
+                      //email
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.email_outlined,
+                            size: 18,
+                            color: Colors.grey,
+                          ),
 
-                            status: value ? 'aktif' : 'tidak aktif',
-                          );
+                          const SizedBox(width: 8),
 
-                          setState(() {});
-                        },
+                          Expanded(
+                            child: Text(
+                              admin['email'],
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 6),
+
+                      //iuran
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(
+                            Icons.payments_outlined,
+                            size: 18,
+                            color: Colors.grey,
+                          ),
+
+                          const SizedBox(width: 8),
+
+                          Expanded(
+                            child: Text(
+                              iuran['nama_iuran'],
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      //status
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+
+                        child: Text(
+                          status,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+
+                            color:
+                                status == 'aktif' ? Colors.green : Colors.red,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      //aksi edit dan switch status admin
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+
+                        children: [
+                          IconButton(
+                            onPressed:
+                                status == 'aktif'
+                                    ? () {
+                                      editAdminDialog(item);
+                                    }
+                                    : null,
+                            icon: Icon(
+                              Icons.edit,
+                              color: status == 'aktif' ? primaryColor : null,
+                            ),
+                          ),
+
+                          Switch(
+                            value: status == 'aktif',
+                            activeColor: primaryColor,
+
+                            onChanged: (value) async {
+                              await adminController.updateStatusRelasi(
+                                relasiId: relasiId,
+
+                                status: value ? 'aktif' : 'tidak aktif',
+                              );
+
+                              setState(() {});
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ),
