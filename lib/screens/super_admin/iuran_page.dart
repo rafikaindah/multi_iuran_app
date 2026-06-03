@@ -15,6 +15,9 @@ class IuranPage extends StatefulWidget {
 class _IuranPageState extends State<IuranPage> {
   final iuranController = IuranController();
 
+  //warna utama
+  final primaryColor = const Color.fromARGB(255, 100, 161, 102);
+
   //fungsi untuk menampilkan dialog tambah iuran
   Future<void> tambahIuranDialog() async {
     final namaController = TextEditingController();
@@ -28,95 +31,156 @@ class _IuranPageState extends State<IuranPage> {
       builder: (_) {
         return StatefulBuilder(
           builder: (context, setModalState) {
-            return AlertDialog(
-              title: const Text("Tambah Iuran"),
-
-              // isi dialog berupa form untuk input data iuran
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: namaController,
-                      decoration: const InputDecoration(
-                        labelText: "Nama Iuran *",
-                      ),
-                    ),
-
-                    TextField(
-                      controller: nominalController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: "Nominal (Opsional)",
-                      ),
-                    ),
-
-                    DropdownButtonFormField<String>(
-                      value: periode,
-
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'Mingguan',
-                          child: Text('Mingguan'),
-                        ),
-
-                        DropdownMenuItem(
-                          value: 'Bulanan',
-                          child: Text('Bulanan'),
-                        ),
-                      ],
-
-                      onChanged: (value) {
-                        setModalState(() {
-                          periode = value;
-                        });
-                      },
-
-                      decoration: const InputDecoration(
-                        labelText: "Periode (Opsional)",
-                      ),
-                    ),
-                  ],
-                ),
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
               ),
 
-              // aksi untuk tombol simpan dan batal
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text("Batal"),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        "Tambah Iuran",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      TextField(
+                        controller: namaController,
+                        decoration: InputDecoration(
+                          labelText: "Nama Iuran",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+
+                      TextField(
+                        controller: nominalController,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: "Nominal (Opsional)",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+
+                      DropdownButtonFormField<String>(
+                        value: periode,
+                        decoration: InputDecoration(
+                          labelText: "Periode",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'Mingguan',
+                            child: Text('Mingguan'),
+                          ),
+
+                          DropdownMenuItem(
+                            value: 'Bulanan',
+                            child: Text('Bulanan'),
+                          ),
+                        ],
+
+                        onChanged: (value) {
+                          setModalState(() {
+                            periode = value;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 25),
+
+                      // aksi untuk tombol simpan dan batal
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+
+                              child: const Text("Batal"),
+                            ),
+                          ),
+
+                          const SizedBox(width: 10),
+
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                // validasi input nama iuran wajib diisi
+                                if (namaController.text.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Nama iuran wajib diisi"),
+                                    ),
+                                  );
+                                  return;
+                                }
+                                // nominal bisa null
+                                await iuranController.tambahIuran(
+                                  namaIuran: namaController.text,
+
+                                  nominal:
+                                      nominalController.text.isEmpty
+                                          ? null
+                                          : int.parse(nominalController.text),
+                                  // periode bisa null
+                                  periode: periode,
+                                );
+
+                                Navigator.pop(context);
+
+                                setState(() {});
+                              },
+
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: primaryColor,
+                                foregroundColor: Colors.white,
+
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+
+                              child: const Text("Simpan"),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-
-                ElevatedButton(
-                  onPressed: () async {
-                    // validasi input nama iuran wajib diisi
-                    if (namaController.text.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Nama iuran wajib diisi")),
-                      );
-                      return;
-                    }
-                    // nominal bisa null
-                    await iuranController.tambahIuran(
-                      namaIuran: namaController.text,
-
-                      nominal:
-                          nominalController.text.isEmpty
-                              ? null
-                              : int.parse(nominalController.text),
-                      // periode bisa null
-                      periode: periode,
-                    );
-
-                    Navigator.pop(context);
-
-                    setState(() {});
-                  },
-                  child: const Text("Simpan"),
-                ),
-              ],
+              ),
             );
           },
         );
@@ -141,97 +205,160 @@ class _IuranPageState extends State<IuranPage> {
       builder: (_) {
         return StatefulBuilder(
           builder: (context, setModalState) {
-            return AlertDialog(
-              title: const Text("Edit Iuran"),
-
-              // isi dialog berupa form untuk input data iuran
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: namaController,
-                      decoration: const InputDecoration(
-                        labelText: "Nama Iuran *",
-                      ),
-                    ),
-
-                    TextField(
-                      controller: nominalController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: "Nominal (Opsional)",
-                      ),
-                    ),
-
-                    DropdownButtonFormField<String>(
-                      value: periode,
-
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'Mingguan',
-                          child: Text('Mingguan'),
-                        ),
-
-                        DropdownMenuItem(
-                          value: 'Bulanan',
-                          child: Text('Bulanan'),
-                        ),
-                      ],
-
-                      onChanged: (value) {
-                        setModalState(() {
-                          periode = value;
-                        });
-                      },
-
-                      decoration: const InputDecoration(
-                        labelText: "Periode (Opsional)",
-                      ),
-                    ),
-                  ],
-                ),
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
               ),
 
-              // aksi untuk tombol update dan batal
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text("Batal"),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+
+                child: SingleChildScrollView(
+                  // isi dialog berupa form untuk input data iuran
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        "Edit Iuran",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      TextField(
+                        controller: namaController,
+                        decoration: InputDecoration(
+                          labelText: "Nama Iuran",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+
+                      TextField(
+                        controller: nominalController,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: "Nominal (Opsional)",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+
+                      DropdownButtonFormField<String>(
+                        value: periode,
+
+                        decoration: InputDecoration(
+                          labelText: "Periode",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'Mingguan',
+                            child: Text('Mingguan'),
+                          ),
+
+                          DropdownMenuItem(
+                            value: 'Bulanan',
+                            child: Text('Bulanan'),
+                          ),
+                        ],
+
+                        onChanged: (value) {
+                          setModalState(() {
+                            periode = value;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 25),
+
+                      // aksi untuk tombol update dan batal
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+
+                              child: const Text("Batal"),
+                            ),
+                          ),
+
+                          const SizedBox(width: 10),
+
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                // validasi input nama iuran wajib diisi
+                                if (namaController.text.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Nama iuran wajib diisi"),
+                                    ),
+                                  );
+                                  return;
+                                }
+                                // nominal bisa null
+                                await iuranController.editIuran(
+                                  id: iuran.id,
+
+                                  namaIuran: namaController.text,
+
+                                  nominal:
+                                      nominalController.text.isEmpty
+                                          ? null
+                                          : int.parse(nominalController.text),
+                                  // periode bisa null
+                                  periode: periode,
+                                );
+
+                                Navigator.pop(context);
+
+                                setState(() {});
+                              },
+
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: primaryColor,
+                                foregroundColor: Colors.white,
+
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+
+                              child: const Text("Update"),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-
-                ElevatedButton(
-                  onPressed: () async {
-                    // validasi input nama iuran wajib diisi
-                    if (namaController.text.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Nama iuran wajib diisi")),
-                      );
-                      return;
-                    }
-                    // nominal bisa null
-                    await iuranController.editIuran(
-                      id: iuran.id,
-
-                      namaIuran: namaController.text,
-
-                      nominal:
-                          nominalController.text.isEmpty
-                              ? null
-                              : int.parse(nominalController.text),
-                      // periode bisa null
-                      periode: periode,
-                    );
-
-                    Navigator.pop(context);
-
-                    setState(() {});
-                  },
-                  child: const Text("Update"),
-                ),
-              ],
+              ),
             );
           },
         );
@@ -242,11 +369,19 @@ class _IuranPageState extends State<IuranPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Data Iuran")),
+      backgroundColor: const Color(0xffF5F7FA),
+
+      appBar: AppBar(
+        title: const Text("Data Iuran"),
+        backgroundColor: primaryColor,
+        foregroundColor: Colors.white,
+        elevation: 0,
+      ),
 
       floatingActionButton: FloatingActionButton(
+        backgroundColor: primaryColor,
         onPressed: tambahIuranDialog,
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
 
       //isian halaman berupa list data iuran yang diambil dari database
@@ -260,67 +395,162 @@ class _IuranPageState extends State<IuranPage> {
           }
           // jika data sudah diambil tetapi kosong, tampilkan pesan data kosong
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("Data iuran kosong"));
+            return const Center(
+              child: Text("Data iuran kosong", style: TextStyle(fontSize: 16)),
+            );
           }
           // menampilkan daftar iuran jika data sudah tersedia
           final iuranList = snapshot.data!;
           // menampilkan data dalam bentuk list
           return ListView.builder(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
             itemCount: iuranList.length,
 
             itemBuilder: (context, index) {
               final iuran = iuranList[index];
 
-              //kartu untuk menampilkan data iuran
-              return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              return Container(
+                margin: const EdgeInsets.only(bottom: 14),
 
-                child: ListTile(
-                  title: Text(iuran.namaIuran),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
 
-                  subtitle: Column(
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // nama iuran
                       Text(
-                        iuran.nominal != null
-                            ? "Rp ${iuran.nominal}"
-                            : "Nominal fleksibel",
+                        iuran.namaIuran,
+
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
 
-                      Text(iuran.periode ?? "Tanpa periode"),
+                      const SizedBox(height: 10),
 
-                      Text("Status: ${iuran.status}"),
-                    ],
-                  ),
+                      // nominal
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(
+                            Icons.payments_outlined,
+                            size: 18,
+                            color: Colors.grey,
+                          ),
 
-                  //aksi untuk edit dan switch status iuran
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        // tombol edit hanya aktif jika status iuran aktif
-                        onPressed:
-                            iuran.status == 'aktif'
-                                ? () {
-                                  editIuranDialog(iuran);
-                                }
-                                : null,
+                          const SizedBox(width: 8),
 
-                        icon: const Icon(Icons.edit),
+                          Expanded(
+                            child: Text(
+                              iuran.nominal != null
+                                  ? "Rp ${iuran.nominal}"
+                                  : "Nominal fleksibel",
+
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ),
+                        ],
                       ),
 
-                      Switch(
-                        value: iuran.status == 'aktif',
+                      const SizedBox(height: 6),
 
-                        onChanged: (value) async {
-                          await iuranController.updateStatus(
-                            id: iuran.id,
+                      // periode
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.calendar_month_outlined,
+                            size: 18,
+                            color: Colors.grey,
+                          ),
 
-                            status: value ? 'aktif' : 'tidak aktif',
-                          );
+                          const SizedBox(width: 8),
 
-                          setState(() {});
-                        },
+                          Expanded(
+                            child: Text(
+                              iuran.periode ?? "Tanpa periode",
+
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      // status
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+
+                        child: Text(
+                          iuran.status,
+
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+
+                            color:
+                                iuran.status == 'aktif'
+                                    ? Colors.green
+                                    : Colors.red,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      //aksi untuk edit dan switch status iuran
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                            // tombol edit hanya aktif jika status iuran aktif
+                            onPressed:
+                                iuran.status == 'aktif'
+                                    ? () {
+                                      editIuranDialog(iuran);
+                                    }
+                                    : null,
+
+                            icon: Icon(
+                              Icons.edit,
+                              color:
+                                  iuran.status == 'aktif' ? primaryColor : null,
+                            ),
+                          ),
+
+                          Switch(
+                            value: iuran.status == 'aktif',
+
+                            activeColor: primaryColor,
+
+                            onChanged: (value) async {
+                              await iuranController.updateStatus(
+                                id: iuran.id,
+
+                                status: value ? 'aktif' : 'tidak aktif',
+                              );
+
+                              setState(() {});
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ),
