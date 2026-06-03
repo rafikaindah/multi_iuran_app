@@ -32,31 +32,56 @@ class _SuperAdminPageState extends State<SuperAdminPage> {
       body:
           pages[selectedIndex], //menampilkan halaman sesuai index yang dipilih
 
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: selectedIndex, //menandai index yang aktif
-        onTap: (index) {
-          //mengubah index saat item ditekan
-          setState(() {
-            selectedIndex = index;
-          });
-        },
-        type: BottomNavigationBarType.fixed, //menampilkan semua item sama rata
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard),
-            label: 'Dashboard',
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+
+        child: BottomNavigationBar(
+          currentIndex: selectedIndex, //menandai index yang aktif
+          onTap: (index) {
+            //mengubah index saat item ditekan
+            setState(() {
+              selectedIndex = index;
+            });
+          },
+          type:
+              BottomNavigationBarType.fixed, //menampilkan semua item sama rata
+
+          backgroundColor: Colors.white,
+          selectedItemColor: const Color.fromARGB(255, 100, 161, 102),
+          unselectedItemColor: Colors.grey,
+          selectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Warga'),
-          BottomNavigationBarItem(icon: Icon(Icons.money), label: 'Iuran'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.admin_panel_settings),
-            label: 'Admin',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.description),
-            label: 'Laporan',
-          ),
-        ],
+          unselectedLabelStyle: const TextStyle(fontSize: 12),
+          elevation: 0,
+
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.dashboard),
+              label: 'Dashboard',
+            ),
+            BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Warga'),
+            BottomNavigationBarItem(icon: Icon(Icons.money), label: 'Iuran'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.admin_panel_settings),
+              label: 'Admin',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.description),
+              label: 'Laporan',
+            ),
+          ],
+        ),
       ),
     );
   }
