@@ -20,6 +20,10 @@ class DashboardAdminIuranPage extends StatefulWidget {
 class _DashboardAdminIuranPageState extends State<DashboardAdminIuranPage> {
   //index halaman yang dipilih
   int selectedIndex = 0;
+
+  // warna utama
+  final primaryColor = const Color.fromARGB(255, 100, 161, 102);
+
   //list halaman untuk dashboard, peserta, transaksi, dan laporan
   late final List<Widget> pages;
 
@@ -75,6 +79,12 @@ class _DashboardAdminIuranPageState extends State<DashboardAdminIuranPage> {
         },
 
         type: BottomNavigationBarType.fixed, //menampilkan semua item sama rata
+        backgroundColor: Colors.white,
+        selectedItemColor: primaryColor,
+        unselectedItemColor: Colors.grey,
+        selectedFontSize: 12,
+        unselectedFontSize: 11,
+        elevation: 0,
 
         items: const [
           BottomNavigationBarItem(

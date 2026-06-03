@@ -18,6 +18,9 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   final pesertaController = PesertaController();
 
+  // warna utama
+  final primaryColor = const Color.fromARGB(255, 100, 161, 102);
+
   int totalPeserta = 0;
 
   bool isLoading = true;
@@ -75,24 +78,77 @@ class _DashboardPageState extends State<DashboardPage> {
     final confirm = await showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text("Konfirmasi Logout"),
-          content: const Text("Apakah yakin untuk logout?"),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context, false);
-              },
-              child: const Text("Batal"),
-            ),
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
 
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context, true);
-              },
-              child: const Text("Logout"),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+
+              children: [
+                const Text(
+                  "Logout",
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+
+                const SizedBox(height: 10),
+
+                const Text(
+                  "Apakah yakin ingin keluar dari aplikasi?",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Color.fromARGB(255, 104, 104, 104)),
+                ),
+
+                const SizedBox(height: 24),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.pop(context, false);
+                        },
+
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+
+                        child: const Text("Batal"),
+                      ),
+                    ),
+
+                    const SizedBox(width: 12),
+
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context, true);
+                        },
+
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+
+                        child: const Text("Logout"),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
+          ),
         );
       },
     );
@@ -123,10 +179,11 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xfff5f1f1),
+      backgroundColor: const Color(0xffF5F7FA),
 
       appBar: AppBar(
-        backgroundColor: const Color(0xfff5f1f1),
+        backgroundColor: primaryColor,
+        foregroundColor: Colors.white,
         elevation: 0,
 
         title: const Text("Beranda"),
@@ -147,30 +204,41 @@ class _DashboardPageState extends State<DashboardPage> {
                     children: [
                       const SizedBox(height: 30),
 
-                      const Icon(
-                        Icons.account_circle,
-                        size: 100,
-                        color: Colors.black,
+                      // avatar
+                      Container(
+                        padding: const EdgeInsets.all(5),
+
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: primaryColor, width: 3),
+                        ),
+
+                        child: Icon(
+                          Icons.account_circle,
+                          size: 100,
+                          color: primaryColor,
+                        ),
                       ),
 
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 15),
 
                       Text(
                         "Halo, $namaAdmin !",
                         style: const TextStyle(
                           fontSize: 22,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.bold,
+                          color: Color.fromARGB(255, 60, 60, 60),
                         ),
-                        textAlign: TextAlign.center,
                       ),
 
                       const SizedBox(height: 10),
 
                       Text(
                         namaIuran,
+                        textAlign: TextAlign.center,
                         style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: Colors.black54,
                         ),
                       ),
 
