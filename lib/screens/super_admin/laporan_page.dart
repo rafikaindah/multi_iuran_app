@@ -19,6 +19,9 @@ class _LaporanPageState extends State<LaporanPage> {
   final iuranController = IuranController();
   final pdfController = PdfController();
 
+  // warna utama
+  final primaryColor = const Color.fromARGB(255, 100, 161, 102);
+
   List<IuranModel> iuranList = [];
   String? selectedIuranId;
   String selectedNamaIuran = "";
@@ -119,8 +122,14 @@ class _LaporanPageState extends State<LaporanPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Laporan")),
-      // menampilkan loading jika data iuran belum dimuat, jika sudah tampilkan konten laporan
+      backgroundColor: const Color(0xffF5F7FA),
+      appBar: AppBar(
+        title: const Text("Laporan"),
+        backgroundColor: primaryColor,
+        foregroundColor: Colors.white,
+        elevation: 0,
+      ),
+      // menampilkan loading jika data iuran belum dimuat, jika sudah  tampilkan konten laporan
       body:
           selectedIuranId == null
               ? const Center(child: CircularProgressIndicator())
@@ -182,7 +191,7 @@ class _LaporanPageState extends State<LaporanPage> {
                       totalPengeluaran == 0;
 
                   return SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
 
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -193,115 +202,220 @@ class _LaporanPageState extends State<LaporanPage> {
                           width: double.infinity,
                           child: ElevatedButton.icon(
                             onPressed: exportPdf,
+
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primaryColor,
+                              foregroundColor: Colors.white,
+
+                              padding: const EdgeInsets.symmetric(vertical: 15),
+
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+
                             icon: const Icon(Icons.picture_as_pdf),
-                            label: const Text("Export PDF"),
+                            label: const Text(
+                              "Export PDF",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ),
 
                         const SizedBox(height: 20),
 
                         // pilih jenis iuran
-                        DropdownButtonFormField<String>(
-                          value: selectedIuranId,
+                        Container(
+                          padding: const EdgeInsets.all(16),
 
-                          decoration: const InputDecoration(
-                            labelText: "Pilih Jenis Iuran",
-                            border: OutlineInputBorder(),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(18),
+
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                           ),
 
-                          items:
-                              iuranList.map((item) {
-                                return DropdownMenuItem<String>(
-                                  value: item.id,
-                                  child: Text(item.namaIuran),
-                                );
-                              }).toList(),
+                          child: Column(
+                            children: [
+                              DropdownButtonFormField<String>(
+                                value: selectedIuranId,
 
-                          onChanged: (value) {
-                            final selected = iuranList.firstWhere(
-                              (item) => item.id == value,
-                            );
-
-                            setState(() {
-                              selectedIuranId = value;
-
-                              selectedNamaIuran = selected.namaIuran;
-                            });
-                          },
-                        ),
-
-                        const SizedBox(height: 15),
-
-                        // filter bulan tahun
-                        Row(
-                          children: [
-                            Expanded(
-                              child: DropdownButtonFormField<int>(
-                                value: selectedBulan,
-
-                                decoration: const InputDecoration(
-                                  labelText: "Bulan",
-                                  border: OutlineInputBorder(),
+                                decoration: InputDecoration(
+                                  labelText: "Pilih Jenis Iuran",
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
                                 ),
 
-                                items: List.generate(12, (index) {
-                                  final bulan = index + 1;
-
-                                  return DropdownMenuItem(
-                                    value: bulan,
-                                    child: Text(namaBulan[bulan]),
-                                  );
-                                }),
+                                items:
+                                    iuranList.map((item) {
+                                      return DropdownMenuItem<String>(
+                                        value: item.id,
+                                        child: Text(item.namaIuran),
+                                      );
+                                    }).toList(),
 
                                 onChanged: (value) {
+                                  final selected = iuranList.firstWhere(
+                                    (item) => item.id == value,
+                                  );
+
                                   setState(() {
-                                    selectedBulan = value!;
+                                    selectedIuranId = value;
+
+                                    selectedNamaIuran = selected.namaIuran;
                                   });
                                 },
                               ),
-                            ),
 
-                            const SizedBox(width: 10),
+                              const SizedBox(height: 15),
 
-                            Expanded(
-                              child: DropdownButtonFormField<int>(
-                                value: selectedTahun,
+                              // filter bulan tahun
+                              Row(
+                                children: [
+                                  Flexible(
+                                    flex: 1,
+                                    child: DropdownButtonFormField<int>(
+                                      value: selectedBulan,
+                                      isExpanded: true,
 
-                                decoration: const InputDecoration(
-                                  labelText: "Tahun",
-                                  border: OutlineInputBorder(),
-                                ),
+                                      decoration: InputDecoration(
+                                        labelText: "Bulan",
 
-                                items: List.generate(5, (index) {
-                                  final tahun = DateTime.now().year - 2 + index;
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 14,
+                                            ),
 
-                                  return DropdownMenuItem(
-                                    value: tahun,
-                                    child: Text("$tahun"),
-                                  );
-                                }),
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                      ),
 
-                                onChanged: (value) {
-                                  setState(() {
-                                    selectedTahun = value!;
-                                  });
-                                },
+                                      items: List.generate(12, (index) {
+                                        final bulan = index + 1;
+
+                                        return DropdownMenuItem(
+                                          value: bulan,
+                                          child: Text(
+                                            namaBulan[bulan],
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        );
+                                      }),
+
+                                      onChanged: (value) {
+                                        setState(() {
+                                          selectedBulan = value!;
+                                        });
+                                      },
+                                    ),
+                                  ),
+
+                                  const SizedBox(width: 10),
+
+                                  Flexible(
+                                    flex: 1,
+                                    child: DropdownButtonFormField<int>(
+                                      value: selectedTahun,
+                                      isExpanded: true,
+
+                                      decoration: InputDecoration(
+                                        labelText: "Tahun",
+
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 14,
+                                            ),
+
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                      ),
+
+                                      items: List.generate(5, (index) {
+                                        final tahun =
+                                            DateTime.now().year - 2 + index;
+
+                                        return DropdownMenuItem(
+                                          value: tahun,
+                                          child: Text(
+                                            "$tahun",
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        );
+                                      }),
+
+                                      onChanged: (value) {
+                                        setState(() {
+                                          selectedTahun = value!;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
 
                         const SizedBox(height: 20),
 
                         // jika tidak ada data
                         if (tidakAdaData)
-                          const Center(
-                            child: Padding(
-                              padding: EdgeInsets.only(top: 50),
-                              child: Text(
-                                "Tidak ada data transaksi pada bulan ini",
-                                style: TextStyle(fontSize: 16),
-                              ),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(30),
+
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+
+                            child: const Column(
+                              children: [
+                                Icon(
+                                  Icons.receipt_long_outlined,
+                                  size: 60,
+                                  color: Colors.grey,
+                                ),
+
+                                SizedBox(height: 15),
+
+                                Text(
+                                  "Tidak ada data transaksi pada bulan ini",
+
+                                  textAlign: TextAlign.center,
+
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
 
@@ -315,60 +429,62 @@ class _LaporanPageState extends State<LaporanPage> {
                             ),
                           ),
 
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 12),
 
-                          Card(
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+
                             child: Column(
                               children: [
-                                ListTile(
-                                  title: const Text("Saldo Bulan Sebelumnya"),
-                                  trailing: Text("Rp $saldoSebelumnya"),
+                                laporanItem(
+                                  "Saldo Bulan Sebelumnya",
+                                  "Rp $saldoSebelumnya",
                                 ),
 
-                                const Divider(height: 1),
+                                divider(),
 
-                                ListTile(
-                                  title: const Text("Total Pembayaran"),
-                                  trailing: Text("Rp $totalPembayaran"),
+                                laporanItem(
+                                  "Total Pembayaran",
+                                  "Rp $totalPembayaran",
                                 ),
 
-                                const Divider(height: 1),
+                                divider(),
 
-                                ListTile(
-                                  title: const Text("Total Pemasukan"),
-                                  trailing: Text("Rp $totalPemasukan"),
+                                laporanItem(
+                                  "Total Pemasukan",
+                                  "Rp $totalPemasukan",
                                 ),
 
-                                const Divider(height: 1),
+                                divider(),
 
-                                ListTile(
-                                  title: const Text("Total Pengeluaran"),
-                                  trailing: Text("Rp $totalPengeluaran"),
+                                laporanItem(
+                                  "Total Pengeluaran",
+                                  "Rp $totalPengeluaran",
                                 ),
 
-                                const Divider(height: 1),
+                                divider(),
 
-                                ListTile(
-                                  title: const Text(
-                                    "Saldo Akhir",
-
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-
-                                  trailing: Text(
-                                    "Rp $saldoAkhir",
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
+                                laporanItem(
+                                  "Saldo Akhir",
+                                  "Rp $saldoAkhir",
+                                  isBold: true,
                                 ),
                               ],
                             ),
                           ),
 
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 25),
 
                           const Text(
                             "Riwayat Transaksi",
@@ -378,23 +494,98 @@ class _LaporanPageState extends State<LaporanPage> {
                             ),
                           ),
 
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 12),
 
                           ...riwayat.map((item) {
-                            return Card(
-                              child: ListTile(
-                                title: Text(item['jenis']),
+                            final isPengeluaran =
+                                item['jenis'] == 'Pengeluaran';
 
-                                subtitle: Column(
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 14),
+
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(18),
+
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.05),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+
+                                child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
 
                                   children: [
-                                    Text("Tanggal : ${item['tanggal']}"),
-                                    Text(item['keterangan']),
+                                    Row(
+                                      children: [
+                                        const SizedBox(width: 12),
+
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+
+                                            children: [
+                                              Text(
+                                                item['jenis'],
+
+                                                style: const TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+
+                                              const SizedBox(height: 4),
+
+                                              Text(
+                                                "Tanggal : ${item['tanggal']}",
+
+                                                style: const TextStyle(
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+
+                                    const SizedBox(height: 14),
+
+                                    Text(
+                                      item['keterangan'],
+
+                                      style: const TextStyle(fontSize: 14),
+                                    ),
+
+                                    const SizedBox(height: 14),
+
+                                    Align(
+                                      alignment: Alignment.centerRight,
+
+                                      child: Text(
+                                        "Rp ${item['nominal']}",
+
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+
+                                          color:
+                                              isPengeluaran
+                                                  ? Colors.red
+                                                  : Colors.green,
+                                        ),
+                                      ),
+                                    ),
                                   ],
                                 ),
-
-                                trailing: Text("Rp ${item['nominal']}"),
                               ),
                             );
                           }),
@@ -405,5 +596,50 @@ class _LaporanPageState extends State<LaporanPage> {
                 },
               ),
     );
+  }
+
+  // widget item laporan
+  Widget laporanItem(String title, String value, {bool isBold = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              title,
+
+              style: TextStyle(
+                fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+                fontSize: 15,
+              ),
+            ),
+          ),
+
+          const SizedBox(width: 10),
+
+          Flexible(
+            child: Text(
+              value,
+
+              textAlign: TextAlign.end,
+
+              overflow: TextOverflow.ellipsis,
+
+              style: TextStyle(
+                fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
+
+                fontSize: 15,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // divider custom
+  Widget divider() {
+    return const Divider(height: 1);
   }
 }
