@@ -63,6 +63,16 @@ class PesertaController {
     required String wargaId,
     required String iuranId,
   }) async {
+    // mengecek apakah warga sudah terdaftar pada iuran yang sama
+    final sudahTerdaftar = await isPesertaTerdaftar(
+      wargaId: wargaId,
+      iuranId: iuranId,
+    );
+    // jika sudah terdaftar tampilkan error
+    if (sudahTerdaftar) {
+      throw Exception("Warga sudah terdaftar pada iuran ini");
+    }
+    // simpan peserta baru
     await supabase.from('peserta').insert({
       'warga_id': wargaId,
       'iuran_id': iuranId,
@@ -145,5 +155,19 @@ class PesertaController {
     return data.map<PesertaModel>((item) {
       return PesertaModel.fromMap(item);
     }).toList();
+  }
+
+  // mengecek apakah warga sudah terdaftar pada iuran yang sama
+  Future<bool> isPesertaTerdaftar({
+    required String wargaId,
+    required String iuranId,
+  }) async {
+    final data = await supabase
+        .from('peserta')
+        .select()
+        .eq('warga_id', wargaId)
+        .eq('iuran_id', iuranId);
+
+    return data.isNotEmpty;
   }
 }

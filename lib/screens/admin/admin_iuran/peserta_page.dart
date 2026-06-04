@@ -21,6 +21,9 @@ class _PesertaPageState extends State<PesertaPage> {
     String? selectedWargaId;
 
     final wargaList = await pesertaController.getWargaAktif();
+    final pesertaList = await pesertaController.getPeserta(widget.iuran['id']);
+    // daftar id warga yang sudah terdaftar
+    final pesertaTerdaftarIds = pesertaList.map((e) => e.wargaId).toSet();
 
     showDialog(
       context: context,
@@ -36,10 +39,29 @@ class _PesertaPageState extends State<PesertaPage> {
                     wargaList.map<DropdownMenuItem<String>>((warga) {
                       return DropdownMenuItem<String>(
                         value: warga['id'].toString(),
-                        child: Text(warga['nama'].toString()),
+                        child: Text(
+                          warga['nama'].toString(),
+                          style: TextStyle(
+                            fontWeight:
+                                pesertaTerdaftarIds.contains(warga['id'])
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                          ),
+                        ),
                       );
                     }).toList(),
                 onChanged: (value) {
+                  // jika sudah terdaftar
+                  if (pesertaTerdaftarIds.contains(value)) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Warga sudah terdaftar pada iuran ini"),
+                      ),
+                    );
+
+                    return;
+                  }
+
                   setModalState(() {
                     selectedWargaId = value;
                   });
