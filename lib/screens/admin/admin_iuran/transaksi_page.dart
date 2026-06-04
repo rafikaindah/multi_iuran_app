@@ -17,6 +17,7 @@ class TransaksiPage extends StatefulWidget {
 class _TransaksiPageState extends State<TransaksiPage>
     with SingleTickerProviderStateMixin {
   late TabController tabController;
+  final Color primaryColor = const Color.fromARGB(255, 100, 161, 102);
 
   @override
   void initState() {
@@ -36,12 +37,17 @@ class _TransaksiPageState extends State<TransaksiPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xffF5F7FA),
       appBar: AppBar(
         title: Text("Transaksi ${widget.iuran['nama_iuran']}"),
-
+        backgroundColor: primaryColor,
+        foregroundColor: Colors.white,
+        elevation: 0,
         bottom: TabBar(
           controller: tabController,
-
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          labelStyle: const TextStyle(fontWeight: FontWeight.bold),
           tabs: const [
             Tab(text: "Pembayaran"),
             Tab(text: "Pemasukan"),
