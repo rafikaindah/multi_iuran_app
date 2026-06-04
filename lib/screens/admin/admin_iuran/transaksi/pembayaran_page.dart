@@ -16,6 +16,9 @@ class PembayaranPage extends StatefulWidget {
 class _PembayaranPageState extends State<PembayaranPage> {
   final pembayaranController = PembayaranController();
 
+  // warna utama aplikasi
+  final Color primaryColor = const Color.fromARGB(255, 100, 161, 102);
+
   // fungsi untuk mendapatkan nama bulan dari nomor bulan
   String getNamaBulan(int bulan) {
     switch (bulan) {
@@ -100,127 +103,229 @@ class _PembayaranPageState extends State<PembayaranPage> {
       builder: (_) {
         return StatefulBuilder(
           builder: (context, setModalState) {
-            return AlertDialog(
-              title: const Text("Form Tambah Pembayaran"),
-              // isi dialog untuk pilih peserta, tanggal, dan periode bayar
-              content: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
+              ),
 
-                  children: [
-                    DropdownButtonFormField<String>(
-                      value: pesertaId,
-                      items:
-                          pesertaList.map<DropdownMenuItem<String>>((peserta) {
-                            return DropdownMenuItem<String>(
-                              value: peserta['id'].toString(),
-                              child: Text(peserta['warga']['nama'].toString()),
-                            );
-                          }).toList(),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
 
-                      onChanged: (value) async {
-                        pesertaId = value;
-
-                        periodeLunas = await pembayaranController
-                            .getPeriodeSudahDibayar(
-                              pesertaId: pesertaId!,
-                              iuranId: widget.iuran['id'],
-                            );
-                        setModalState(() {});
-                      },
-
-                      decoration: const InputDecoration(
-                        labelText: "Pilih Peserta",
+                    children: [
+                      const Center(
+                        child: Text(
+                          "Tambah Pembayaran",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                    ),
 
-                    TextField(
-                      controller: tanggalController,
-                      decoration: const InputDecoration(
-                        labelText: "Tanggal Pembayaran",
+                      const SizedBox(height: 20),
+
+                      // pilih peserta
+                      DropdownButtonFormField<String>(
+                        value: pesertaId,
+
+                        decoration: InputDecoration(
+                          labelText: "Pilih Peserta",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+
+                        items:
+                            pesertaList.map<DropdownMenuItem<String>>((
+                              peserta,
+                            ) {
+                              return DropdownMenuItem<String>(
+                                value: peserta['id'].toString(),
+                                child: Text(
+                                  peserta['warga']['nama'].toString(),
+                                ),
+                              );
+                            }).toList(),
+
+                        onChanged: (value) async {
+                          pesertaId = value;
+
+                          periodeLunas = await pembayaranController
+                              .getPeriodeSudahDibayar(
+                                pesertaId: pesertaId!,
+                                iuranId: widget.iuran['id'],
+                              );
+                          setModalState(() {});
+                        },
                       ),
-                    ),
+                      const SizedBox(height: 16),
 
-                    Text(
-                      "Nominal Bayar : Rp $totalBayar",
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
+                      // tanggal
+                      TextField(
+                        controller: tanggalController,
+                        decoration: InputDecoration(
+                          labelText: "Tanggal Pembayaran",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
 
-                    const Text("Pilih periode yang dibayar"),
-                    // menampilkan checkbox untuk setiap periode, jika sudah lunas maka checkbox tidak bisa dipilih
-                    Column(
-                      children:
-                          periodeList.map((periode) {
-                            final sudahBayar = periodeLunas.contains(periode);
-                            return CheckboxListTile(
-                              value:
-                                  sudahBayar
-                                      ? true
-                                      : selectedPeriode.contains(periode),
+                      const SizedBox(height: 16),
 
-                              title: Text(periode),
-                              controlAffinity: ListTileControlAffinity.leading,
-                              enabled: !sudahBayar,
+                      // total bayar
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(14),
 
-                              onChanged: (value) {
-                                setModalState(() {
-                                  if (value == true) {
-                                    if (!selectedPeriode.contains(periode)) {
-                                      selectedPeriode.add(periode);
+                        decoration: BoxDecoration(
+                          color: primaryColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+
+                        child: Text(
+                          "Nominal Bayar : Rp $totalBayar",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      const Text(
+                        "Pilih Periode Pembayaran",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      // list periode
+                      Column(
+                        children:
+                            periodeList.map((periode) {
+                              final sudahBayar = periodeLunas.contains(periode);
+                              return CheckboxListTile(
+                                value:
+                                    sudahBayar
+                                        ? true
+                                        : selectedPeriode.contains(periode),
+
+                                title: Text(
+                                  periode,
+                                  style: TextStyle(
+                                    fontWeight:
+                                        sudahBayar
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                  ),
+                                ),
+                                controlAffinity:
+                                    ListTileControlAffinity.leading,
+                                enabled: !sudahBayar,
+
+                                onChanged: (value) {
+                                  setModalState(() {
+                                    if (value == true) {
+                                      if (!selectedPeriode.contains(periode)) {
+                                        selectedPeriode.add(periode);
+                                      }
+                                    } else {
+                                      selectedPeriode.remove(periode);
                                     }
-                                  } else {
-                                    selectedPeriode.remove(periode);
-                                  }
 
-                                  totalBayar =
-                                      selectedPeriode.length * nominalIuran;
-                                });
+                                    totalBayar =
+                                        selectedPeriode.length * nominalIuran;
+                                  });
+                                },
+                              );
+                            }).toList(),
+                      ),
+                      const SizedBox(height: 20),
+                      // aksi untuk tombol simpan dan batal
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () {
+                                Navigator.pop(context);
                               },
-                            );
-                          }).toList(),
-                    ),
-                  ],
+
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+
+                              child: const Text("Batal"),
+                            ),
+                          ),
+
+                          const SizedBox(width: 10),
+
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                if (pesertaId == null ||
+                                    selectedPeriode.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        "Peserta dan periode wajib dipilih",
+                                      ),
+                                    ),
+                                  );
+
+                                  return;
+                                }
+
+                                await pembayaranController.tambahPembayaran(
+                                  pesertaId: pesertaId!,
+                                  iuranId: widget.iuran['id'],
+                                  nominal: totalBayar,
+                                  tanggal: tanggalController.text,
+                                  periodeBayar: selectedPeriode,
+                                );
+
+                                Navigator.pop(context);
+
+                                setState(() {});
+                              },
+
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: primaryColor,
+                                foregroundColor: Colors.white,
+
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+
+                              child: const Text("Simpan"),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              // aksi untuk tombol simpan dan batal
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-
-                  child: const Text("Batal"),
-                ),
-
-                ElevatedButton(
-                  onPressed: () async {
-                    if (pesertaId == null || selectedPeriode.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Peserta dan periode wajib dipilih"),
-                        ),
-                      );
-
-                      return;
-                    }
-
-                    await pembayaranController.tambahPembayaran(
-                      pesertaId: pesertaId!,
-                      iuranId: widget.iuran['id'],
-                      nominal: totalBayar,
-                      tanggal: tanggalController.text,
-                      periodeBayar: selectedPeriode,
-                    );
-
-                    Navigator.pop(context);
-
-                    setState(() {});
-                  },
-
-                  child: const Text("Simpan"),
-                ),
-              ],
             );
           },
         );
@@ -231,12 +336,14 @@ class _PembayaranPageState extends State<PembayaranPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xffF5F7FA),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: primaryColor,
         onPressed:
             widget.iuran['status'] == 'aktif'
                 ? tambahPembayaranDialog
                 : null, // tombol tidak aktif jika iuran tidak aktif
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
       // menampilkan list pembayaran
       body: FutureBuilder<List<PembayaranModel>>(
@@ -249,32 +356,107 @@ class _PembayaranPageState extends State<PembayaranPage> {
           }
           //jika data kosong
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("Data pembayaran kosong"));
+            return const Center(
+              child: Text(
+                "Data pembayaran kosong",
+                style: TextStyle(fontSize: 16),
+              ),
+            );
           }
           //jika ada data pembayaran
           final pembayaranList = snapshot.data!;
 
           return ListView.builder(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
             itemCount: pembayaranList.length,
 
             itemBuilder: (context, index) {
               final pembayaran = pembayaranList[index];
               // menampilkan card pembayaran
-              return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              return Container(
+                margin: const EdgeInsets.only(bottom: 14),
 
-                child: ListTile(
-                  title: Text(pembayaran.namaPeserta ?? '-'),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
 
-                  subtitle: Column(
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
 
                     children: [
-                      Text("Rp ${pembayaran.nominal}"),
+                      // nama peserta
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              pembayaran.namaPeserta ?? '-',
 
-                      Text("Periode : ${pembayaran.periodeBayar.join(", ")}"),
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
 
-                      Text("Tanggal : ${pembayaran.tanggal}"),
+                      const SizedBox(height: 10),
+
+                      // nominal
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              "Rp ${pembayaran.nominal}",
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      // periode
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+
+                        children: [
+                          Expanded(
+                            child: Text(
+                              "Periode : ${pembayaran.periodeBayar.join(", ")}",
+
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      // tanggal
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              "Tanggal : ${pembayaran.tanggal}",
+
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
