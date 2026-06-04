@@ -525,8 +525,6 @@ class _LaporanPageState extends State<LaporanPage> {
                                   children: [
                                     Row(
                                       children: [
-                                        const SizedBox(width: 12),
-
                                         Expanded(
                                           child: Column(
                                             crossAxisAlignment:
@@ -557,7 +555,7 @@ class _LaporanPageState extends State<LaporanPage> {
                                       ],
                                     ),
 
-                                    const SizedBox(height: 14),
+                                    const SizedBox(height: 4),
 
                                     Text(
                                       item['keterangan'],
