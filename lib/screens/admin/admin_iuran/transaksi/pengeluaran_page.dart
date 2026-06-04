@@ -23,6 +23,8 @@ class _PengeluaranPageState extends State<PengeluaranPage> {
 
   final picker = ImagePicker();
 
+  final Color primaryColor = const Color.fromARGB(255, 100, 161, 102);
+
   File? selectedImage;
 
   // fungsi pilih gambar
@@ -55,108 +57,180 @@ class _PengeluaranPageState extends State<PengeluaranPage> {
       builder: (_) {
         return StatefulBuilder(
           builder: (context, setStateDialog) {
-            return AlertDialog(
-              title: const Text("Tambah Pengeluaran"),
-              // isi dialog untuk input nominal, tanggal, dan keterangan
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-
-                  children: [
-                    TextField(
-                      controller: nominalController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(labelText: "Nominal"),
-                    ),
-
-                    TextField(
-                      controller: tanggalController,
-                      decoration: const InputDecoration(labelText: "Tanggal"),
-                    ),
-
-                    TextField(
-                      controller: keteranganController,
-                      decoration: const InputDecoration(
-                        labelText: "Keterangan",
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        "Tambah Pengeluaran",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
 
-                    const SizedBox(height: 12),
+                      const SizedBox(height: 20),
 
-                    ElevatedButton(
-                      onPressed: () {
-                        pickImage(setStateDialog);
-                      },
+                      TextField(
+                        controller: nominalController,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: "Nominal",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
 
-                      child: const Text("Pilih Bukti Foto"),
-                    ),
+                      const SizedBox(height: 14),
 
-                    // preview gambar
-                    if (selectedImage != null)
-                      Container(
-                        margin: const EdgeInsets.only(top: 10),
+                      TextField(
+                        controller: tanggalController,
+                        decoration: InputDecoration(
+                          labelText: "Tanggal",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
 
-                        height: 200,
+                      const SizedBox(height: 14),
 
+                      TextField(
+                        controller: keteranganController,
+                        maxLines: 2,
+                        decoration: InputDecoration(
+                          labelText: "Keterangan",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      SizedBox(
                         width: double.infinity,
-
-                        child: Image.file(selectedImage!, fit: BoxFit.cover),
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            pickImage(setStateDialog);
+                          },
+                          icon: const Icon(Icons.image),
+                          label: const Text("Pilih Bukti Foto"),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
                       ),
-                  ],
+
+                      // preview gambar
+                      if (selectedImage != null) ...[
+                        const SizedBox(height: 14),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.file(
+                            selectedImage!,
+                            height: 200,
+
+                            width: double.infinity,
+
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ],
+
+                      const SizedBox(height: 24),
+                      // aksi untuk tombol simpan dan batal
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: const Text("Batal"),
+                            ),
+                          ),
+
+                          const SizedBox(width: 10),
+
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                if (nominalController.text.isEmpty ||
+                                    keteranganController.text.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Semua kolom wajib diisi"),
+                                    ),
+                                  );
+
+                                  return;
+                                }
+
+                                String? imageUrl;
+
+                                // upload gambar
+                                if (selectedImage != null) {
+                                  imageUrl = await storageController.uploadFoto(
+                                    selectedImage!,
+                                  );
+                                }
+
+                                await pengeluaranController.tambahPengeluaran(
+                                  iuranId: widget.iuran['id'],
+                                  nominal: int.parse(
+                                    nominalController.text.replaceAll('.', ''),
+                                  ),
+                                  tanggal: tanggalController.text,
+                                  keterangan: keteranganController.text,
+                                  buktiFoto: imageUrl,
+                                );
+
+                                Navigator.pop(context);
+
+                                setState(() {
+                                  selectedImage = null;
+                                });
+                              },
+
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: primaryColor,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+
+                              child: const Text("Simpan"),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              // aksi untuk tombol simpan dan batal
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-
-                  child: const Text("Batal"),
-                ),
-
-                ElevatedButton(
-                  onPressed: () async {
-                    if (nominalController.text.isEmpty ||
-                        keteranganController.text.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Semua field wajib diisi"),
-                        ),
-                      );
-
-                      return;
-                    }
-
-                    String? imageUrl;
-
-                    // upload gambar
-                    if (selectedImage != null) {
-                      imageUrl = await storageController.uploadFoto(
-                        selectedImage!,
-                      );
-                    }
-
-                    await pengeluaranController.tambahPengeluaran(
-                      iuranId: widget.iuran['id'],
-                      nominal: int.parse(
-                        nominalController.text.replaceAll('.', ''),
-                      ),
-                      tanggal: tanggalController.text,
-                      keterangan: keteranganController.text,
-                      buktiFoto: imageUrl,
-                    );
-
-                    Navigator.pop(context);
-
-                    setState(() {
-                      selectedImage = null;
-                    });
-                  },
-
-                  child: const Text("Simpan"),
-                ),
-              ],
             );
           },
         );
@@ -167,12 +241,14 @@ class _PengeluaranPageState extends State<PengeluaranPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xffF5F7FA),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: primaryColor,
         onPressed:
             widget.iuran['status'] == 'aktif'
                 ? tambahPengeluaranDialog
                 : null, // tombol tidak aktif jika iuran tidak aktif
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
       // body untuk menampilkan daftar pengeluaran
       body: FutureBuilder<List<PengeluaranModel>>(
@@ -185,45 +261,91 @@ class _PengeluaranPageState extends State<PengeluaranPage> {
           }
           //jika kosong
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("Data pengeluaran kosong"));
+            return const Center(
+              child: Text(
+                "Data pengeluaran kosong",
+                style: TextStyle(fontSize: 16),
+              ),
+            );
           }
           //jika ada data pengeluaran
           final pengeluaranList = snapshot.data!;
 
           return ListView.builder(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
             itemCount: pengeluaranList.length,
 
             itemBuilder: (context, index) {
               final pengeluaran = pengeluaranList[index];
               // menampilkan card pengeluaran
-              return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              return Container(
+                margin: const EdgeInsets.only(bottom: 14),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
 
-                child: ListTile(
-                  title: Text("Rp ${pengeluaran.nominal}"),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
 
-                  subtitle: Column(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
 
                     children: [
-                      Text(pengeluaran.keterangan),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              "Rp ${pengeluaran.nominal}",
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
 
-                      Text("Tanggal : ${pengeluaran.tanggal}"),
+                      const SizedBox(height: 10),
+
+                      Text(
+                        "Keterangan : ${pengeluaran.keterangan}",
+                        style: const TextStyle(fontSize: 14),
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      Row(
+                        children: [
+                          Text(
+                            "Tanggal : ${pengeluaran.tanggal}",
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ],
+                      ),
 
                       // gambar bukti
-                      if (pengeluaran.buktiFoto != null)
-                        Container(
-                          margin: const EdgeInsets.only(top: 10),
+                      if (pengeluaran.buktiFoto != null) ...[
+                        const SizedBox(height: 14),
 
-                          height: 200,
-
-                          width: double.infinity,
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(14),
 
                           child: Image.network(
                             pengeluaran.buktiFoto!,
+                            height: 220,
+                            width: double.infinity,
                             fit: BoxFit.cover,
                           ),
                         ),
+                      ],
                     ],
                   ),
                 ),
