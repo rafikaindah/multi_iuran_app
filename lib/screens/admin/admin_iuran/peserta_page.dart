@@ -552,20 +552,11 @@ class _PesertaPageState extends State<PesertaPage> {
 
                         children: [
                           IconButton(
-                            onPressed:
-                                peserta.statusWarga == 'aktif'
-                                    ? () {
-                                      detailPesertaDialog(peserta);
-                                    }
-                                    : null,
+                            onPressed: () {
+                              detailPesertaDialog(peserta);
+                            },
 
-                            icon: Icon(
-                              Icons.info_outline,
-                              color:
-                                  peserta.statusWarga == 'aktif'
-                                      ? primaryColor
-                                      : null,
-                            ),
+                            icon: Icon(Icons.info_outline, color: primaryColor),
                           ),
                           // switch status
                           Switch(
