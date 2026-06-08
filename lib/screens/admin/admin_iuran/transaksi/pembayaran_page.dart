@@ -291,17 +291,30 @@ class _PembayaranPageState extends State<PembayaranPage> {
                                   return;
                                 }
 
-                                await pembayaranController.tambahPembayaran(
-                                  pesertaId: pesertaId!,
-                                  iuranId: widget.iuran['id'],
-                                  nominal: totalBayar,
-                                  tanggal: tanggalController.text,
-                                  periodeBayar: selectedPeriode,
-                                );
+                                try {
+                                  await pembayaranController.tambahPembayaran(
+                                    pesertaId: pesertaId!,
+                                    iuranId: widget.iuran['id'],
+                                    nominal: totalBayar,
+                                    tanggal: tanggalController.text,
+                                    periodeBayar: selectedPeriode,
+                                  );
 
-                                Navigator.pop(context);
+                                  Navigator.pop(context);
 
-                                setState(() {});
+                                  setState(() {});
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        e.toString().replaceAll(
+                                          'Exception: ',
+                                          '',
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }
                               },
 
                               style: ElevatedButton.styleFrom(

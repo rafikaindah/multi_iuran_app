@@ -33,6 +33,42 @@ class PembayaranController {
     required String tanggal,
     required List<String> periodeBayar,
   }) async {
+    // cek status peserta + warga
+    final pesertaData =
+        await supabase
+            .from('peserta')
+            .select('''
+            status,
+
+            warga:warga_id (
+              status
+            )
+          ''')
+            .eq('id', pesertaId)
+            .single();
+
+    // cek status iuran
+    final iuranData =
+        await supabase
+            .from('iuran')
+            .select('status')
+            .eq('id', iuranId)
+            .single();
+
+    final statusPeserta = pesertaData['status'];
+    final statusWarga = pesertaData['warga']['status'];
+    final statusIuran = iuranData['status'];
+
+    // hentikan transaksi jika tidak aktif
+    if (statusPeserta != 'aktif' ||
+        statusWarga != 'aktif' ||
+        statusIuran != 'aktif') {
+      throw Exception(
+        'Pembayaran tidak dapat dilakukan karena peserta sudah dihentikan',
+      );
+    }
+
+    // simpan pembayaran
     await supabase.from('pembayaran').insert({
       'peserta_id': pesertaId,
       'iuran_id': iuranId,

@@ -94,6 +94,31 @@ class PesertaController {
     required Map<String, dynamic> iuran,
   }) async {
     //ambil pembayaran peserta
+    final pesertaData =
+        await supabase
+            .from('peserta')
+            .select('''
+            status,
+
+            warga (
+              status
+            )
+          ''')
+            .eq('id', pesertaId)
+            .single();
+
+    final statusPeserta = pesertaData['status'];
+    final statusWarga = pesertaData['warga']['status'];
+    final statusIuran = iuran['status'];
+
+    // jika warga / peserta / iuran tidak aktif
+    if (statusPeserta != 'aktif' ||
+        statusWarga != 'aktif' ||
+        statusIuran != 'aktif') {
+      return {'status': 'Dinonaktifkan', 'jumlah_tunggakan': 0};
+    }
+
+    // ambil pembayaran peserta
     final data = await supabase
         .from('pembayaran')
         .select('periode_bayar')
