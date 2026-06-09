@@ -475,61 +475,10 @@ class _PesertaPageState extends State<PesertaPage> {
                         ),
                       ),
 
-                      const SizedBox(height: 12),
-
-                      // alamat
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-
-                        children: [
-                          const Icon(
-                            Icons.location_on_outlined,
-                            size: 18,
-                            color: Colors.grey,
-                          ),
-
-                          const SizedBox(width: 8),
-
-                          Expanded(
-                            child: Text(
-                              peserta.alamat,
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                          ),
-                        ],
-                      ),
-
                       const SizedBox(height: 8),
-
-                      // nomor hp
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.phone_outlined,
-                            size: 18,
-                            color: Colors.grey,
-                          ),
-
-                          const SizedBox(width: 8),
-
-                          Expanded(
-                            child: Text(
-                              peserta.noHp,
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 12),
 
                       // status peserta
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-
                         child: Text(
                           peserta.status,
 
@@ -544,7 +493,7 @@ class _PesertaPageState extends State<PesertaPage> {
                         ),
                       ),
 
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 8),
 
                       // tombol aksi
                       Row(
