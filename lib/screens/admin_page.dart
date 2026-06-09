@@ -39,27 +39,28 @@ class _AdminPageState extends State<AdminPage> {
     final data = await supabase
         .from('admin_iuran_relasi')
         .select('''
-              status,
+          status,
 
-              iuran (
-                id,
-                nama_iuran,
-                nominal,
-                periode,
-                status,
-                created_at
-              )
-            ''')
-        .eq('admin_id', adminId)
-        .eq('status', 'aktif');
+          iuran (
+            id,
+            nama_iuran,
+            nominal,
+            periode,
+            status,
+            created_at
+          )
+        ''')
+        .eq('admin_id', adminId);
 
     //ambil semua iuran yang dikelola admin
     final iuranList =
-        data
-            .map<Map<String, dynamic>>(
-              (item) => item['iuran'] as Map<String, dynamic>,
-            )
-            .toList();
+        data.map<Map<String, dynamic>>((item) {
+          final iuran = Map<String, dynamic>.from(item['iuran']);
+
+          iuran['status_relasi'] = item['status'];
+
+          return iuran;
+        }).toList();
 
     //jika hanya 1 iuran
     if (iuranList.length == 1) {

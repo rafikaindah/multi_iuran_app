@@ -35,7 +35,7 @@ class PilihIuranPage extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final iuran = iuranList[index];
 
-                  final bool aktif = iuran['status'] == 'aktif';
+                  final bool aktif = iuran['status_relasi'] == 'aktif';
 
                   //kartu iuran untu memilih iuran
                   return Container(
@@ -100,6 +100,36 @@ class PilihIuranPage extends StatelessWidget {
                       trailing: const Icon(Icons.arrow_forward_ios, size: 18),
                       //navigasi ke dashboard iuran yang dipilih
                       onTap: () {
+                        //jika iuran tidak aktif
+                        if (!aktif) {
+                          showDialog(
+                            context: context,
+
+                            builder: (_) {
+                              return AlertDialog(
+                                title: const Text("Akses Ditolak"),
+
+                                content: const Text(
+                                  "Anda dinonaktifkan sebagai admin iuran ini",
+                                ),
+
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+
+                                    child: const Text("OK"),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+
+                          return;
+                        }
+
+                        //jika iuran aktif
                         Navigator.push(
                           context,
                           MaterialPageRoute(
