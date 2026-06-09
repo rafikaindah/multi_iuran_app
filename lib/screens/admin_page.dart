@@ -46,7 +46,8 @@ class _AdminPageState extends State<AdminPage> {
                 nama_iuran,
                 nominal,
                 periode,
-                status
+                status,
+                created_at
               )
             ''')
         .eq('admin_id', adminId)

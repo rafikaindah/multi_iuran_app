@@ -19,65 +19,90 @@ class _PembayaranPageState extends State<PembayaranPage> {
   // warna utama aplikasi
   final Color primaryColor = const Color.fromARGB(255, 100, 161, 102);
 
-  // fungsi untuk mendapatkan nama bulan dari nomor bulan
+  // fungsi untuk mendapatkan nama bulan
   String getNamaBulan(int bulan) {
-    switch (bulan) {
-      case 1:
-        return 'Jan';
-      case 2:
-        return 'Feb';
-      case 3:
-        return 'Mar';
-      case 4:
-        return 'Apr';
-      case 5:
-        return 'Mei';
-      case 6:
-        return 'Jun';
-      case 7:
-        return 'Jul';
-      case 8:
-        return 'Agu';
-      case 9:
-        return 'Sep';
-      case 10:
-        return 'Okt';
-      case 11:
-        return 'Nov';
-      default:
-        return 'Des';
-    }
+    const namaBulan = [
+      '',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'Mei',
+      'Jun',
+      'Jul',
+      'Agu',
+      'Sep',
+      'Okt',
+      'Nov',
+      'Des',
+    ];
+    return namaBulan[bulan];
   }
 
-  //generate periode berdasarkan periode iuran (mingguan atau bulanan)
-  List<String> generatePeriode() {
+  // ambil created_at iuran
+  DateTime getCreatedAt() {
     final now = DateTime.now();
+    final createdAtRaw =
+        widget.iuran['created_at'] ?? widget.iuran['iuran']?['created_at'];
+    return createdAtRaw != null
+        ? DateTime.tryParse(createdAtRaw.toString()) ?? now
+        : now;
+  }
 
-    //mingguan
-    if (widget.iuran['periode'] == 'Mingguan') {
-      return [
-        'Minggu 1 ${getNamaBulan(now.month)} ${now.year}',
-        'Minggu 2 ${getNamaBulan(now.month)} ${now.year}',
-        'Minggu 3 ${getNamaBulan(now.month)} ${now.year}',
-        'Minggu 4 ${getNamaBulan(now.month)} ${now.year}',
-      ];
+  // semua periode dari created_at iuran sampai sekarang (untuk cek tunggakan)
+  List<String> generateSemuaPeriode() {
+    final now = DateTime.now(); //tanggal saat ini untuk batas akir perhitungan
+
+    final String periode =
+        widget.iuran['periode']?.toString() ?? ''; //ambil jenis periode iuran
+    final DateTime createdAt = getCreatedAt(); //ambil tanggal pembuatan iuran
+
+    List<String> periodeList = [];
+
+    //jika mingguan
+    if (periode == 'Mingguan') {
+      DateTime cursor = DateTime(
+        createdAt.year,
+        createdAt.month,
+      ); //menghitung dari bulan iuran dibuat
+      final DateTime batasAkhir = DateTime(
+        now.year,
+        now.month,
+      ); //berhenti pada bulan saat ini
+      //perulangan dari bulan awal sampai bulan sekarang
+      while (!cursor.isAfter(batasAkhir)) {
+        int mingguMulai = 1;
+        if (cursor.year == createdAt.year && cursor.month == createdAt.month) {
+          mingguMulai =
+              ((createdAt.day - 1) ~/ 7) + 1; //menentukan minggu ke berapa
+        }
+        for (int minggu = mingguMulai; minggu <= 4; minggu++) {
+          periodeList.add(
+            'Minggu $minggu ${getNamaBulan(cursor.month)} ${cursor.year}',
+          );
+        }
+        //pindah ke bulan berikutnya
+        cursor = DateTime(cursor.year, cursor.month + 1);
+      }
+    } else {
+      //jika bulanan
+      DateTime cursor = DateTime(
+        createdAt.year,
+        createdAt.month,
+      ); //mulai dari bulan iuran dibuat
+      final DateTime batasAkhir = DateTime(
+        now.year,
+        now.month,
+      ); //berhenti pada bulan saat ini
+      //perulangan dari bulan awal sampai bulan sekarang
+      while (!cursor.isAfter(batasAkhir)) {
+        periodeList.add('${getNamaBulan(cursor.month)} ${cursor.year}');
+        //pindah ke bulan berikutnya
+        cursor = DateTime(cursor.year, cursor.month + 1);
+      }
     }
 
-    //bulanan
-    return [
-      'Jan ${now.year}',
-      'Feb ${now.year}',
-      'Mar ${now.year}',
-      'Apr ${now.year}',
-      'Mei ${now.year}',
-      'Jun ${now.year}',
-      'Jul ${now.year}',
-      'Agu ${now.year}',
-      'Sep ${now.year}',
-      'Okt ${now.year}',
-      'Nov ${now.year}',
-      'Des ${now.year}',
-    ];
+    return periodeList;
   }
 
   //dialog tambah pembayaran
@@ -96,7 +121,8 @@ class _PembayaranPageState extends State<PembayaranPage> {
     int totalBayar = 0; //
     final int nominalIuran =
         int.tryParse(widget.iuran['nominal'].toString()) ?? 0;
-    final periodeList = generatePeriode();
+    // checkbox periode baru muncul setelah peserta dipilih
+    List<String> periodeList = [];
 
     showDialog(
       context: context,
@@ -154,12 +180,81 @@ class _PembayaranPageState extends State<PembayaranPage> {
                         onChanged: (value) async {
                           pesertaId = value;
 
+                          // ambil periode yang sudah dibayar peserta yang dipilih
                           periodeLunas = await pembayaranController
                               .getPeriodeSudahDibayar(
                                 pesertaId: pesertaId!,
                                 iuranId: widget.iuran['id'],
                               );
-                          setModalState(() {});
+
+                          // reset pilihan saat ganti peserta
+                          selectedPeriode.clear();
+                          totalBayar = 0;
+
+                          final semuaPeriode = generateSemuaPeriode();
+                          // periode yang belum dibayar peserta ini (tunggakan)
+                          final periodeBelumdibayar =
+                              semuaPeriode
+                                  .where((p) => !periodeLunas.contains(p))
+                                  .toList();
+
+                          // periode default: bulan ini + 5 bulan ke depan
+                          final String periodeIuran =
+                              widget.iuran['periode']?.toString() ?? '';
+                          List<String> periodeDefault = [];
+
+                          if (periodeIuran == 'Mingguan') {
+                            final now = DateTime.now();
+                            periodeDefault = [
+                              'Minggu 1 ${getNamaBulan(now.month)} ${now.year}',
+                              'Minggu 2 ${getNamaBulan(now.month)} ${now.year}',
+                              'Minggu 3 ${getNamaBulan(now.month)} ${now.year}',
+                              'Minggu 4 ${getNamaBulan(now.month)} ${now.year}',
+                            ];
+                          } else {
+                            final now = DateTime.now();
+
+                            DateTime cursor = DateTime(now.year, now.month);
+
+                            final DateTime batasAkhir = DateTime(
+                              now.year,
+                              now.month + 5,
+                            );
+
+                            while (!cursor.isAfter(batasAkhir)) {
+                              periodeDefault.add(
+                                '${getNamaBulan(cursor.month)} ${cursor.year}',
+                              );
+
+                              cursor = DateTime(cursor.year, cursor.month + 1);
+                            }
+                          }
+
+                          // gabungkan tunggakan + periode default (hindari duplikat)
+                          final gabungan = [
+                            ...periodeBelumdibayar,
+                            ...periodeDefault.where(
+                              (p) => !periodeBelumdibayar.contains(p),
+                            ),
+                          ];
+
+                          // urutkan sesuai urutan waktu
+                          final referensi = [
+                            ...semuaPeriode,
+                            ...periodeDefault.where(
+                              (p) => !semuaPeriode.contains(p),
+                            ),
+                          ];
+
+                          gabungan.sort(
+                            (a, b) => referensi
+                                .indexOf(a)
+                                .compareTo(referensi.indexOf(b)),
+                          );
+
+                          setModalState(() {
+                            periodeList = gabungan;
+                          });
                         },
                       ),
                       const SizedBox(height: 16),

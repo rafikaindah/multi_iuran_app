@@ -8,6 +8,7 @@ class IuranModel {
   final String? periode;
 
   final String status;
+  final String? createdAt;
 
   //fungsi konstruktor untuk membuat dan mengisi data iuran
   IuranModel({
@@ -16,6 +17,7 @@ class IuranModel {
     this.nominal,
     this.periode,
     required this.status,
+    this.createdAt,
   });
 
   //factory method untuk mengubah data dari bentuk Map (dari database) menjadi objek iuran
@@ -26,6 +28,7 @@ class IuranModel {
       nominal: data['nominal'],
       periode: data['periode'],
       status: data['status'],
+      createdAt: data['created_at'],
     );
   }
 }
