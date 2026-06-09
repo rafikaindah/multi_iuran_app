@@ -16,6 +16,7 @@ class _LoginPageState extends State<LoginPage> {
   final passwordController = TextEditingController();
 
   final authController = AuthController();
+  bool isPasswordHidden = true;
 
   // Fungsi untuk menangani proses login
   Future<void> login() async {
@@ -81,11 +82,24 @@ class _LoginPageState extends State<LoginPage> {
 
                       TextField(
                         controller: passwordController,
-                        obscureText: true,
+                        obscureText: isPasswordHidden,
                         decoration: InputDecoration(
                           labelText: "Password",
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
+                          ),
+                          // icon mata untuk show/hide password
+                          suffixIcon: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                isPasswordHidden = !isPasswordHidden;
+                              });
+                            },
+                            icon: Icon(
+                              isPasswordHidden
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
                           ),
                         ),
                       ),
