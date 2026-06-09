@@ -39,66 +39,55 @@ class _PembayaranPageState extends State<PembayaranPage> {
     return namaBulan[bulan];
   }
 
-  // ambil created_at iuran
-  DateTime getCreatedAt() {
-    final now = DateTime.now();
-    final createdAtRaw =
-        widget.iuran['created_at'] ?? widget.iuran['iuran']?['created_at'];
-    return createdAtRaw != null
-        ? DateTime.tryParse(createdAtRaw.toString()) ?? now
-        : now;
-  }
-
-  // semua periode dari created_at iuran sampai sekarang (untuk cek tunggakan)
-  List<String> generateSemuaPeriode() {
-    final now = DateTime.now(); //tanggal saat ini untuk batas akir perhitungan
+  // periode yang harus dibayar (dihitung dari bulan peserta terdaftar sampai bulan saat ini)
+  List<String> generateSemuaPeriode({required DateTime pesertaCreatedAt}) {
+    final now = DateTime.now(); //batas akhir perhitungan
 
     final String periode =
-        widget.iuran['periode']?.toString() ?? ''; //ambil jenis periode iuran
-    final DateTime createdAt = getCreatedAt(); //ambil tanggal pembuatan iuran
+        widget.iuran['periode']?.toString() ?? ''; // jenis periode iuran
+    List<String> periodeList = []; // hasil periode
 
-    List<String> periodeList = [];
-
-    //jika mingguan
+    //periode mingguan
     if (periode == 'Mingguan') {
-      DateTime cursor = DateTime(
-        createdAt.year,
-        createdAt.month,
-      ); //menghitung dari bulan iuran dibuat
-      final DateTime batasAkhir = DateTime(
-        now.year,
-        now.month,
-      ); //berhenti pada bulan saat ini
-      //perulangan dari bulan awal sampai bulan sekarang
+      // mulai dari bulan peserta daftar, berhenti di bulan ini
+      DateTime cursor = DateTime(pesertaCreatedAt.year, pesertaCreatedAt.month);
+      final DateTime batasAkhir = DateTime(now.year, now.month);
+
       while (!cursor.isAfter(batasAkhir)) {
+        // bulan pertama: hitung mulai dari minggu keberapa peserta daftar
+        // daftar tanggal 10 → (10-1)~/7 + 1 = minggu ke-2
         int mingguMulai = 1;
-        if (cursor.year == createdAt.year && cursor.month == createdAt.month) {
-          mingguMulai =
-              ((createdAt.day - 1) ~/ 7) + 1; //menentukan minggu ke berapa
+        if (cursor.year == pesertaCreatedAt.year &&
+            cursor.month == pesertaCreatedAt.month) {
+          mingguMulai = ((pesertaCreatedAt.day - 1) ~/ 7) + 1;
         }
+
+        // tambahkan setiap minggu pada bulan ini ke list
         for (int minggu = mingguMulai; minggu <= 4; minggu++) {
           periodeList.add(
             'Minggu $minggu ${getNamaBulan(cursor.month)} ${cursor.year}',
           );
         }
-        //pindah ke bulan berikutnya
-        cursor = DateTime(cursor.year, cursor.month + 1);
+
+        cursor = DateTime(
+          cursor.year,
+          cursor.month + 1,
+        ); // maju ke bulan berikutnya
       }
+
+      //periode bulanan
     } else {
-      //jika bulanan
-      DateTime cursor = DateTime(
-        createdAt.year,
-        createdAt.month,
-      ); //mulai dari bulan iuran dibuat
-      final DateTime batasAkhir = DateTime(
-        now.year,
-        now.month,
-      ); //berhenti pada bulan saat ini
-      //perulangan dari bulan awal sampai bulan sekarang
+      // mulai dari bulan peserta daftar, berhenti di bulan ini
+      DateTime cursor = DateTime(pesertaCreatedAt.year, pesertaCreatedAt.month);
+      final DateTime batasAkhir = DateTime(now.year, now.month);
       while (!cursor.isAfter(batasAkhir)) {
-        periodeList.add('${getNamaBulan(cursor.month)} ${cursor.year}');
-        //pindah ke bulan berikutnya
-        cursor = DateTime(cursor.year, cursor.month + 1);
+        periodeList.add(
+          '${getNamaBulan(cursor.month)} ${cursor.year}',
+        ); // tambahkan bulan ke list
+        cursor = DateTime(
+          cursor.year,
+          cursor.month + 1,
+        ); // maju ke bulan berikutnya
       }
     }
 
@@ -191,7 +180,22 @@ class _PembayaranPageState extends State<PembayaranPage> {
                           selectedPeriode.clear();
                           totalBayar = 0;
 
-                          final semuaPeriode = generateSemuaPeriode();
+                          // ambil created_at peserta yang dipilih
+                          final selectedPeserta = pesertaList.firstWhere(
+                            (p) => p['id'].toString() == pesertaId,
+                          );
+                          final pesertaCreatedAtRaw =
+                              selectedPeserta['created_at']?.toString();
+                          final pesertaCreatedAt =
+                              pesertaCreatedAtRaw != null
+                                  ? DateTime.tryParse(pesertaCreatedAtRaw) ??
+                                      DateTime.now()
+                                  : DateTime.now();
+
+                          // gunakan created_at peserta sebagai titik awal periode
+                          final semuaPeriode = generateSemuaPeriode(
+                            pesertaCreatedAt: pesertaCreatedAt,
+                          );
                           // periode yang belum dibayar peserta ini (tunggakan)
                           final periodeBelumdibayar =
                               semuaPeriode

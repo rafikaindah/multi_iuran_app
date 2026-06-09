@@ -11,6 +11,7 @@ class PembayaranController {
         .select('''
         id,
         status,
+        created_at,
         warga:warga_id (
           nama,
           status
