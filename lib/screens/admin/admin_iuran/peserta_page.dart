@@ -202,6 +202,8 @@ class _PesertaPageState extends State<PesertaPage> {
     final statusPembayaran = await pesertaController.getStatusPembayaran(
       pesertaId: peserta.id,
       iuran: widget.iuran,
+      pesertaCreatedAt:
+          DateTime.tryParse(peserta.createdAt ?? '') ?? DateTime.now(),
     );
 
     Widget detailItem(String title, String value) {

@@ -5,14 +5,49 @@ import '../models/peserta_model.dart';
 class PesertaController {
   final supabase = Supabase.instance.client;
 
-  //mengambil peserta berdasarkan iuran
+  // helper: minggu ke berapa dalam bulan (1–4)
+  int _mingguDari(DateTime d) => ((d.day - 1) ~/ 7) + 1;
+
+  // helper: hitung total periode yang seharusnya sudah dibayar
+  int _hitungPeriode({
+    required String periode,
+    required DateTime pesertaCreatedAt,
+  }) {
+    final now = DateTime.now();
+
+    if (periode == 'Mingguan') {
+      // Selisih bulan antara bulan daftar dan bulan sekarang
+      final selisihBulan =
+          (now.year - pesertaCreatedAt.year) * 12 +
+          (now.month - pesertaCreatedAt.month);
+
+      // Minggu yang sudah lewat di bulan ini (minggu sekarang belum dihitung)
+      final mingguSudahLewatBulanIni = _mingguDari(now) - 1;
+
+      // Minggu di bulan pertama sebelum peserta daftar (diabaikan)
+      final mingguAwalDiabaikan = _mingguDari(pesertaCreatedAt) - 1;
+
+      final total =
+          selisihBulan * 4 + mingguSudahLewatBulanIni - mingguAwalDiabaikan;
+
+      return total < 0 ? 0 : total;
+    } else {
+      // Bulanan: bulan sekarang belum dihitung, tunggakan muncul bulan depan
+      final total =
+          (now.year - pesertaCreatedAt.year) * 12 +
+          (now.month - pesertaCreatedAt.month - 1);
+
+      return total < 0 ? 0 : total;
+    }
+  }
+
   Future<List<PesertaModel>> getPeserta(String iuranId) async {
     final data = await supabase
         .from('peserta')
         .select('''
           id,
           status,
-
+          created_at,
           warga (
             id,
             nama,
@@ -92,6 +127,7 @@ class PesertaController {
   Future<Map<String, dynamic>> getStatusPembayaran({
     required String pesertaId,
     required Map<String, dynamic> iuran,
+    required DateTime pesertaCreatedAt,
   }) async {
     //ambil pembayaran peserta
     final pesertaData =
@@ -124,27 +160,18 @@ class PesertaController {
         .select('periode_bayar')
         .eq('peserta_id', pesertaId);
 
-    //gabungkan semua periode yang sudah dibayar
-    List<String> periodeBayar = [];
-
+    final periodeBayar = <String>{};
     for (var item in data) {
-      final list = List<String>.from(item['periode_bayar'] ?? []);
-      periodeBayar.addAll(list);
+      periodeBayar.addAll(List<String>.from(item['periode_bayar'] ?? []));
     }
-    //hitung total periode yang seharusnya sudah dibayar
-    final now = DateTime.now();
-    int totalPeriodeSeharusnya = 0;
 
-    //jika mingguan adalah 4 minggu dalam 1 bulan
-    if (iuran['periode'] == 'Mingguan') {
-      totalPeriodeSeharusnya = 4;
-    }
-    //jika bulanan adalah bulan berjalan
-    else {
-      totalPeriodeSeharusnya = now.month;
-    }
-    final totalSudahBayar = periodeBayar.toSet().length;
-    final tunggakan = totalPeriodeSeharusnya - totalSudahBayar;
+    //hitung periode seharusnya vs sudah bayar
+    final totalSeharusnya = _hitungPeriode(
+      periode: iuran['periode'],
+      pesertaCreatedAt: pesertaCreatedAt,
+    );
+
+    final tunggakan = totalSeharusnya - periodeBayar.length;
 
     return {
       'status': tunggakan <= 0 ? 'Lunas' : 'Menunggak',
@@ -157,22 +184,22 @@ class PesertaController {
     final data = await supabase
         .from('peserta')
         .select('''
-        id,
-        status,
-
-        warga (
           id,
-          nama,
-          alamat,
-          no_hp,
-          status
-        ),
+          status,
+          created_at,
+          warga (
+            id,
+            nama,
+            alamat,
+            no_hp,
+            status
+          ),
 
-        iuran (
-          id,
-          nama_iuran
-        )
-      ''')
+          iuran (
+            id,
+            nama_iuran
+          )
+        ''')
         .eq('iuran_id', iuranId)
         .eq('status', 'aktif')
         .order('created_at', ascending: false);

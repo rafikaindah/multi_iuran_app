@@ -12,6 +12,7 @@ class PesertaModel {
 
   final String status;
   final String statusWarga;
+  final String? createdAt;
 
   //fungsi konstruktor untuk membuat dan mengisi data peserta
   PesertaModel({
@@ -24,6 +25,7 @@ class PesertaModel {
     required this.namaIuran,
     required this.status,
     required this.statusWarga,
+    this.createdAt,
   });
 
   //factory method untuk mengubah data dari bentuk Map (dari database) menjadi objek peserta
@@ -41,6 +43,7 @@ class PesertaModel {
 
       status: data['status'],
       statusWarga: data['warga']['status'],
+      createdAt: data['created_at'],
     );
   }
 }
